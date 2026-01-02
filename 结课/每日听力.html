@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>每日听力</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 顶部搜索+难度选择栏 */
+        .top-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .search-bar {
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+            transform: scale(1.01);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 12px;
+            font-size: 18px;
+            color: #5a4ebb;
+        }
+        /* 难度选择区 */
+        .difficulty-section {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
+        .difficulty-section::-webkit-scrollbar {
+            display: none;
+        }
+        .difficulty-btn {
+            padding: 8px 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            border: none;
+            transition: all 0.2s;
+        }
+        .difficulty-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 10px rgba(90, 78, 187, 0.1);
+        }
+        .difficulty-btn.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .difficulty-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 今日听力模块 */
+        .daily-listening-section {
+            margin-bottom: 25px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .section-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .section-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+        .listening-card {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(49, 47, 172, 0.2);
+            transition: all 0.3s;
+        }
+        .listening-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(49, 47, 172, 0.25);
+        }
+        /* 音频控制区 */
+        .audio-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .audio-cover {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background-color: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .audio-cover:hover {
+            transform: scale(1.05);
+            background-color: rgba(255,255,255,0.3);
+        }
+        .audio-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .audio-info {
+            flex: 1;
+        }
+        .audio-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        .audio-meta {
+            font-size: 12px;
+            color: #e0e8ff;
+        }
+        .audio-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .control-btn:hover {
+            transform: scale(1.1);
+            background-color: rgba(255,255,255,0.3);
+        }
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+        .play-btn {
+            background-color: #fff;
+            color: #5a4ebb;
+        }
+        .play-btn.paused {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+        /* 音频进度+功能按钮 */
+        .audio-progress {
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin-bottom: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress-bar:hover {
+            height: 6px;
+        }
+        .progress-current {
+            position: absolute;
+            left: 35%;
+            top: 0;
+            height: 100%;
+            width: 35%;
+            background-color: #fff;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        .progress-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #e0e8ff;
+        }
+        .function-btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .func-btn {
+            flex: 1;
+            padding: 8px 0;
+            border-radius: 20px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .func-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .func-btn:active {
+            transform: scale(0.98);
+        }
+        .speed-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .text-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .text-btn.showing {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+        .test-btn {
+            background-color: #fff;
+            color: #5a4ebb;
+            font-weight: 500;
+        }
+        /* 听力原文/翻译区 */
+        .listening-content {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+        .listening-content:hover {
+            background-color: rgba(255,255,255,0.15);
+        }
+        .content-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .content-tab {
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            background-color: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .content-tab:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        .content-tab.active {
+            background-color: #fff;
+            color: #5a4ebb;
+        }
+        .content-text {
+            font-size: 14px;
+            line-height: 1.6;
+            transition: all 0.3s;
+        }
+        .content-text.hidden {
+            display: none;
+        }
+        /* 重点词汇 */
+        .key-words {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
+        .key-words:hover {
+            background-color: rgba(255,255,255,0.15);
+        }
+        .key-title {
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: #e0e8ff;
+        }
+        .key-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .key-item {
+            font-size: 12px;
+            padding: 5px 10px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .key-item:hover {
+            transform: scale(1.05);
+            background-color: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 听力历史模块 */
+        .history-section {
+            margin-bottom: 20px;
+        }
+        .history-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .history-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .history-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 5px;
+            border-radius: 10px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #5a4ebb;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .history-item:hover .history-icon {
+            transform: scale(1.1);
+            background-color: #d0d8ff;
+        }
+        .history-content {
+            flex: 1;
+        }
+        .history-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .history-meta {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            gap: 10px;
+        }
+        .history-status {
+            font-size: 12px;
+            color: #5a4ebb;
+            background-color: #e0e8ff;
+            padding: 3px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .history-item:hover .history-status {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 听力测试弹窗 */
+        .test-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .test-content {
+            width: 85%;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 25px 20px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .test-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .test-item {
+            padding: 15px;
+            border: 1px solid #e0e8ff;
+            border-radius: 10px;
+        }
+        .test-question {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .test-option {
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .test-option:hover {
+            background-color: #f5f7ff;
+            border-color: #5a4ebb;
+        }
+        .test-option.selected {
+            background-color: #5a4ebb;
+            color: #fff;
+            border-color: #5a4ebb;
+        }
+        .test-submit {
+            padding: 10px 0;
+            border-radius: 15px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">每日听力</div>
+
+        <!-- 顶部搜索+难度选择栏 -->
+        <div class="top-bar">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索听力素材/关键词" id="searchInput">
+            </div>
+            <!-- 难度选择区 -->
+            <div class="difficulty-section">
+                <button class="difficulty-btn" data-level="初级">初级</button>
+                <button class="difficulty-btn active" data-level="中级">中级</button>
+                <button class="difficulty-btn" data-level="高级">高级</button>
+            </div>
+        </div>
+
+        <!-- 今日听力模块 -->
+        <div class="daily-listening-section">
+            <div class="section-header">
+                <span>今日听力</span>
+                <a href="javascript:;" class="more-link" id="moreMaterial">更多素材 ></a>
+            </div>
+            <div class="listening-card">
+                <!-- 音频控制区 -->
+                <div class="audio-control">
+                    <div class="audio-cover" id="audioCover">
+                        <!-- 音频封面占位，可替换为图片 -->
+                        🎧
+                    </div>
+                    <div class="audio-info">
+                        <div class="audio-title" id="audioTitle">【中级】日常购物场景英语对话</div>
+                        <div class="audio-meta">时长：2分35秒 | 生词量：8个</div>
+                    </div>
+                    <div class="audio-btns">
+                        <button class="control-btn play-btn" id="playBtn">▶️</button>
+                        <button class="control-btn" id="replayBtn">🔄</button>
+                    </div>
+                </div>
+
+                <!-- 音频进度+功能按钮 -->
+                <div class="audio-progress">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-current" id="progressCurrent"></div>
+                    </div>
+                    <div class="progress-time">
+                        <span id="currentTime">00:54</span>
+                        <span>2:35</span>
+                    </div>
+                </div>
+
+                <div class="function-btns">
+                    <button class="func-btn speed-btn" id="speedBtn">1.0x 倍速</button>
+                    <button class="func-btn text-btn" id="textBtn">查看原文</button>
+                    <button class="func-btn test-btn" id="testBtn">听力测试</button>
+                </div>
+
+                <!-- 听力原文区 -->
+                <div class="listening-content">
+                    <div class="content-tabs">
+                        <div class="content-tab active" data-tab="original">英文原文</div>
+                        <div class="content-tab" data-tab="translation">中文翻译</div>
+                    </div>
+                    <div class="content-text" id="originalText">
+                        A: Good morning! Can I help you find anything today?<br>
+                        B: Yes, I'm looking for a pair of running shoes. Do you have any recommendations?<br>
+                        A: Sure! We have a new collection from Nike that's very popular. They're lightweight and have good cushioning.<br>
+                        B: That sounds great. Can I try a size 8?<br>
+                        A: Absolutely! Let me get them for you right away.
+                    </div>
+                    <div class="content-text hidden" id="translationText">
+                        A：早上好！今天需要我帮您找什么吗？<br>
+                        B：是的，我想买一双跑鞋。你有什么推荐的吗？<br>
+                        A：当然！我们有耐克的新款系列，非常受欢迎。它们轻便且缓冲效果很好。<br>
+                        B：听起来不错。我能试一下8码的吗？<br>
+                        A：没问题！我马上给您拿。
+                    </div>
+                </div>
+
+                <!-- 重点词汇 -->
+                <div class="key-words">
+                    <div class="key-title">重点词汇：</div>
+                    <div class="key-list">
+                        <div class="key-item" data-word="recommendations">recommendations 推荐</div>
+                        <div class="key-item" data-word="collection">collection 系列</div>
+                        <div class="key-item" data-word="lightweight">lightweight 轻便的</div>
+                        <div class="key-item" data-word="cushioning">cushioning 缓冲</div>
+                        <div class="key-item" data-word="absolutely">absolutely 绝对地</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 听力历史模块 -->
+        <div class="history-section">
+            <div class="section-header">
+                <span>听力历史</span>
+                <a href="javascript:;" class="more-link" id="clearHistory">清空历史 ></a>
+            </div>
+            <div class="history-card">
+                <div class="history-list" id="historyList">
+                    <!-- 历史1 -->
+                    <div class="history-item" data-history="【初级】餐厅点餐基础对话">
+                        <div class="history-icon">🎧</div>
+                        <div class="history-content">
+                            <div class="history-title">【初级】餐厅点餐基础对话</div>
+                            <div class="history-meta">
+                                <span>昨天 14:25</span>
+                                <span>时长：1分48秒</span>
+                            </div>
+                        </div>
+                        <div class="history-status">已完成</div>
+                    </div>
+                    <!-- 历史2 -->
+                    <div class="history-item" data-history="【中级】职场电话沟通技巧">
+                        <div class="history-icon">🎧</div>
+                        <div class="history-content">
+                            <div class="history-title">【中级】职场电话沟通技巧</div>
+                            <div class="history-meta">
+                                <span>3天前</span>
+                                <span>时长：3分12秒</span>
+                            </div>
+                        </div>
+                        <div class="history-status">已测试</div>
+                    </div>
+                    <!-- 历史3 -->
+                    <div class="history-item" data-history="【初级】机场登机常用语">
+                        <div class="history-icon">🎧</div>
+                        <div class="history-content">
+                            <div class="history-title">【初级】机场登机常用语</div>
+                            <div class="history-meta">
+                                <span>1周前</span>
+                                <span>时长：2分05秒</span>
+                            </div>
+                        </div>
+                        <div class="history-status">已完成</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“首页”栏 -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </div>
+        <div class="nav-item" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </div>
+        <div class="nav-item" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </div>
+        <div class="nav-item" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 听力测试弹窗 -->
+    <div class="test-modal" id="testModal">
+        <div class="test-content">
+            <div class="test-title">日常购物场景听力测试</div>
+            <div class="test-list">
+                <div class="test-item">
+                    <div class="test-question">1. What is the customer looking for?</div>
+                    <div class="test-options">
+                        <div class="test-option" data-answer="1">A. A pair of basketball shoes</div>
+                        <div class="test-option" data-answer="2">B. A pair of running shoes</div>
+                        <div class="test-option" data-answer="3">C. A pair of football shoes</div>
+                    </div>
+                </div>
+                <div class="test-item">
+                    <div class="test-question">2. What size does the customer want to try?</div>
+                    <div class="test-options">
+                        <div class="test-option" data-answer="1">A. Size 7</div>
+                        <div class="test-option" data-answer="2">B. Size 8</div>
+                        <div class="test-option" data-answer="3">C. Size 9</div>
+                    </div>
+                </div>
+            </div>
+            <button class="test-submit" id="testSubmit">提交答案</button>
+        </div>
+    </div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('focus', () => {
+            showToast('输入听力素材关键词即可搜索');
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                showToast(`正在匹配：${e.target.value}`, 1000);
+            }
+        });
+        
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                searchHandler();
+            }
+        });
+        
+        // 搜索处理函数
+        function searchHandler() {
+            const keyword = searchInput.value.trim();
+            if (!keyword) {
+                showToast('请输入搜索关键词');
+                return;
+            }
+            
+            showToast(`正在搜索【${keyword}】相关听力素材...`);
+            
+            setTimeout(() => {
+                showToast(`找到【${keyword}】相关听力素材8个`);
+                searchInput.blur();
+            }, 800);
+        }
+
+        // 2. 难度选择按钮交互
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有激活状态
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                // 添加当前激活状态
+                btn.classList.add('active');
+                
+                const level = btn.dataset.level;
+                showToast(`已切换到【${level}】难度听力素材`);
+                
+                // 模拟切换音频内容
+                const audioTitle = document.getElementById('audioTitle');
+                if (level === '初级') {
+                    audioTitle.textContent = `【初级】日常购物场景英语对话（简易版）`;
+                } else if (level === '中级') {
+                    audioTitle.textContent = `【中级】日常购物场景英语对话`;
+                } else if (level === '高级') {
+                    audioTitle.textContent = `【高级】高端商场购物英语对话`;
+                }
+            });
+        });
+
+        // 3. 更多素材交互
+        const moreMaterial = document.getElementById('moreMaterial');
+        
+        moreMaterial.addEventListener('click', () => {
+            showToast('加载更多听力素材，共15个主题');
+            
+            // 模拟添加提示，实际项目中可动态加载
+            setTimeout(() => {
+                showToast('已加载本周最新听力素材');
+            }, 800);
+        });
+
+        // 4. 音频封面点击
+        const audioCover = document.getElementById('audioCover');
+        
+        audioCover.addEventListener('click', () => {
+            togglePlayStatus();
+        });
+
+        // 5. 播放/暂停按钮交互
+        const playBtn = document.getElementById('playBtn');
+        let isPlaying = false;
+        
+        playBtn.addEventListener('click', togglePlayStatus);
+        
+        function togglePlayStatus() {
+            if (isPlaying) {
+                // 暂停
+                playBtn.classList.remove('paused');
+                playBtn.textContent = '▶️';
+                showToast('音频已暂停');
+                isPlaying = false;
+                
+                // 停止进度条动画
+                clearInterval(progressInterval);
+            } else {
+                // 播放
+                playBtn.classList.add('paused');
+                playBtn.textContent = '⏸️';
+                showToast('开始播放音频');
+                isPlaying = true;
+                
+                // 启动进度条动画
+                startProgressAnimation();
+            }
+        }
+
+        // 6. 重新播放按钮交互
+        const replayBtn = document.getElementById('replayBtn');
+        let progressInterval;
+        
+        replayBtn.addEventListener('click', () => {
+            showToast('重新播放音频');
+            
+            // 重置播放状态
+            playBtn.classList.remove('paused');
+            playBtn.textContent = '▶️';
+            isPlaying = false;
+            
+            // 重置进度条
+            const progressCurrent = document.getElementById('progressCurrent');
+            progressCurrent.style.left = '0%';
+            progressCurrent.style.width = '0%';
+            
+            // 重置时间
+            const currentTime = document.getElementById('currentTime');
+            currentTime.textContent = '00:00';
+            
+            // 清除进度条定时器
+            clearInterval(progressInterval);
+        });
+
+        // 进度条动画函数
+        function startProgressAnimation() {
+            clearInterval(progressInterval);
+            
+            const progressCurrent = document.getElementById('progressCurrent');
+            const currentTime = document.getElementById('currentTime');
+            
+            let left = 0;
+            let width = 0;
+            let seconds = 0;
+            
+            progressInterval = setInterval(() => {
+                left += 0.5;
+                width += 0.5;
+                seconds += 1;
+                
+                // 更新进度条
+                progressCurrent.style.left = `${left}%`;
+                progressCurrent.style.width = `${width}%`;
+                
+                // 更新时间
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                currentTime.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                // 播放完成
+                if (left >= 99) {
+                    clearInterval(progressInterval);
+                    playBtn.classList.remove('paused');
+                    playBtn.textContent = '▶️';
+                    isPlaying = false;
+                    showToast('音频播放完成');
+                }
+            }, 1000);
+        }
+
+        // 7. 进度条点击交互
+        const progressBar = document.getElementById('progressBar');
+        
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percent = (clickX / rect.width) * 100;
+            
+            // 更新进度条
+            const progressCurrent = document.getElementById('progressCurrent');
+            progressCurrent.style.left = '0%';
+            progressCurrent.style.width = `${percent}%`;
+            
+            // 更新时间
+            const totalSeconds = 155; // 2分35秒 = 155秒
+            const currentSeconds = Math.floor(totalSeconds * (percent / 100));
+            const minutes = Math.floor(currentSeconds / 60);
+            const secs = currentSeconds % 60;
+            
+            const currentTime = document.getElementById('currentTime');
+            currentTime.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            showToast(`已跳转到 ${currentTime.textContent}`);
+            
+            // 如果正在播放，重置进度条动画
+            if (isPlaying) {
+                clearInterval(progressInterval);
+                startProgressAnimation();
+            }
+        });
+
+        // 8. 倍速按钮交互
+        const speedBtn = document.getElementById('speedBtn');
+        let currentSpeed = 1.0;
+        const speeds = [0.75, 1.0, 1.25, 1.5];
+        
+        speedBtn.addEventListener('click', () => {
+            // 切换倍速
+            const currentIndex = speeds.indexOf(currentSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            currentSpeed = speeds[nextIndex];
+            
+            speedBtn.textContent = `${currentSpeed}x 倍速`;
+            showToast(`已切换到 ${currentSpeed}x 倍速播放`);
+            
+            // 模拟倍速变化（实际项目中需调整音频播放速度）
+            if (isPlaying) {
+                clearInterval(progressInterval);
+                startProgressAnimation();
+            }
+        });
+
+        // 9. 查看原文按钮交互
+        const textBtn = document.getElementById('textBtn');
+        let isShowingText = false;
+        
+        textBtn.addEventListener('click', () => {
+            if (isShowingText) {
+                // 隐藏原文
+                textBtn.classList.remove('showing');
+                textBtn.textContent = '查看原文';
+                showToast('已隐藏听力原文');
+                isShowingText = false;
+                
+                // 隐藏原文区域（模拟）
+                document.querySelector('.listening-content').style.opacity = '0.5';
+            } else {
+                // 显示原文
+                textBtn.classList.add('showing');
+                textBtn.textContent = '隐藏原文';
+                showToast('已显示听力原文');
+                isShowingText = true;
+                
+                // 显示原文区域
+                document.querySelector('.listening-content').style.opacity = '1';
+            }
+        });
+
+        // 10. 原文/翻译标签切换
+        const contentTabs = document.querySelectorAll('.content-tab');
+        const originalText = document.getElementById('originalText');
+        const translationText = document.getElementById('translationText');
+        
+        contentTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有激活状态
+                contentTabs.forEach(t => t.classList.remove('active'));
+                // 添加当前激活状态
+                tab.classList.add('active');
+                
+                const tabType = tab.dataset.tab;
+                if (tabType === 'original') {
+                    originalText.classList.remove('hidden');
+                    translationText.classList.add('hidden');
+                    showToast('切换到英文原文');
+                } else if (tabType === 'translation') {
+                    originalText.classList.add('hidden');
+                    translationText.classList.remove('hidden');
+                    showToast('切换到中文翻译');
+                }
+            });
+        });
+
+        // 11. 重点词汇点击交互
+        const keyItems = document.querySelectorAll('.key-item');
+        
+        keyItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const word = item.dataset.word;
+                const fullText = item.textContent;
+                
+                showToast(`查看【${word}】详细解释`);
+                
+                // 模拟显示详细解释
+                let explain = '';
+                if (word === 'recommendations') {
+                    explain = 'recommendations (n.) 推荐；建议 | 动词形式：recommend | 搭配：give recommendations';
+                } else if (word === 'collection') {
+                    explain = 'collection (n.) 系列；收藏 | 搭配：new collection 新款系列';
+                } else if (word === 'lightweight') {
+                    explain = 'lightweight (adj.) 轻便的；轻量级的 | 反义词：heavyweight';
+                } else if (word === 'cushioning') {
+                    explain = 'cushioning (n.) 缓冲；减震 | 动词形式：cushion 缓冲';
+                } else if (word === 'absolutely') {
+                    explain = 'absolutely (adv.) 绝对地；完全地 | 口语中常用：Absolutely! 当然！';
+                }
+                
+                setTimeout(() => {
+                    showToast(explain, 3000);
+                }, 800);
+            });
+        });
+
+        // 12. 听力测试按钮交互
+        const testBtn = document.getElementById('testBtn');
+        const testModal = document.getElementById('testModal');
+        const testSubmit = document.getElementById('testSubmit');
+        
+        testBtn.addEventListener('click', () => {
+            showToast('生成听力测试题目...');
+            
+            setTimeout(() => {
+                testModal.style.display = 'flex';
+                showToast('测试题目生成完成');
+            }, 800);
+        });
+
+        // 测试选项点击
+        const testOptions = document.querySelectorAll('.test-option');
+        
+        testOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除同题目的其他选中状态
+                const parentOptions = option.parentElement.querySelectorAll('.test-option');
+                parentOptions.forEach(o => o.classList.remove('selected'));
+                
+                // 添加当前选中状态
+                option.classList.add('selected');
+            });
+        });
+
+        // 提交测试答案
+        testSubmit.addEventListener('click', () => {
+            const selectedOptions = document.querySelectorAll('.test-option.selected');
+            
+            if (selectedOptions.length < 2) {
+                showToast('请完成所有题目后提交');
+                return;
+            }
+            
+            testSubmit.disabled = true;
+            testSubmit.textContent = '批改中...';
+            
+            setTimeout(() => {
+                testModal.style.display = 'none';
+                showToast('测试批改完成！得分：100分，听力掌握度：优秀');
+                testSubmit.disabled = false;
+                testSubmit.textContent = '提交答案';
+                
+                // 清空选中状态
+                testOptions.forEach(o => o.classList.remove('selected'));
+            }, 1500);
+        });
+
+        // 13. 清空历史交互
+        const clearHistory = document.getElementById('clearHistory');
+        
+        clearHistory.addEventListener('click', () => {
+            showToast('确定要清空听力历史吗？再次点击确认', 3000);
+            
+            // 二次确认
+            let confirmed = false;
+            clearHistory.addEventListener('click', () => {
+                if (!confirmed) {
+                    confirmed = true;
+                    showToast('正在清空听力历史...');
+                    
+                    setTimeout(() => {
+                        const historyList = document.getElementById('historyList');
+                        historyList.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">暂无听力历史记录</div>';
+                        showToast('听力历史已清空');
+                    }, 800);
+                }
+            }, { once: true });
+        });
+
+        // 14. 历史项点击交互
+        const historyItems = document.querySelectorAll('.history-item');
+        
+        historyItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const historyTitle = item.dataset.history;
+                showToast(`重新播放：${historyTitle}`);
+                
+                // 模拟切换到该历史音频
+                const audioTitle = document.getElementById('audioTitle');
+                audioTitle.textContent = historyTitle;
+                
+                // 重置播放状态
+                playBtn.classList.remove('paused');
+                playBtn.textContent = '▶️';
+                isPlaying = false;
+                
+                // 重置进度条
+                const progressCurrent = document.getElementById('progressCurrent');
+                progressCurrent.style.left = '0%';
+                progressCurrent.style.width = '0%';
+                
+                // 重置时间
+                const currentTime = document.getElementById('currentTime');
+                currentTime.textContent = '00:00';
+                
+                clearInterval(progressInterval);
+            });
+        });
+
+        // 15. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 首页不重复提示
+                if (navName !== '首页') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持首页激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:first-child').classList.add('active');
+                } else {
+                    showToast('已在首页页面');
+                }
+            });
+        });
+    </script>
+
+                    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>

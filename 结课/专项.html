@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>专项能力提升</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 顶部搜索栏 */
+        .search-bar {
+            padding: 10px 0;
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 35px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+            transform: scale(1.01);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            font-size: 16px;
+            color: #999;
+            transition: color 0.2s;
+        }
+        .search-bar input:focus + ::before {
+            color: #5a4ebb;
+        }
+
+        /* 顶部图片区 */
+        .top-imgs {
+            padding: 15px 0;
+            display: flex;
+            gap: 10px;
+        }
+        .top-imgs .img-item {
+            flex: 1;
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .top-imgs .img-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .top-imgs .img-item:active {
+            transform: scale(0.98);
+        }
+        .top-imgs .img-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: all 0.3s;
+        }
+        .top-imgs .img-item:hover img {
+            transform: scale(1.05);
+        }
+        .top-imgs .img-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255,255,255,0.8);
+            color: #5a4ebb;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .top-imgs .img-item:hover .img-tag {
+            background-color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.2);
+        }
+
+        /* 分类标签栏 */
+        .category-tabs {
+            padding: 10px 0;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .category-tabs a {
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            padding: 5px 10px;
+            text-decoration: none;
+            cursor: pointer;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .category-tabs a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .category-tabs a.active {
+            color: #5a4ebb;
+            font-weight: bold;
+            background-color: #e0e8ff;
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.15);
+        }
+
+        /* 专项卡片模块 - 完全仿照今日语伴格式 */
+        .special-section {
+            padding: 10px 0 20px;
+        }
+        .special-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .special-header a {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .special-header a:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+        /* 专项卡片 - 和今日语伴卡片完全一致 */
+        .special-card {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff; /* 文字改为白色，保证可读性 */
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex; /* 横向布局：图标+内容+按钮 */
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 3px 10px rgba(49, 47, 172, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .special-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(49, 47, 172, 0.25);
+        }
+        /* 卡片图标 */
+        .special-card .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2); /* 半透明白色背景 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            transition: all 0.3s;
+        }
+        .special-card:hover .card-icon {
+            transform: scale(1.1);
+            background-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+        /* 卡片内容区 */
+        .special-content {
+            flex: 1;
+        }
+        .special-content h3 {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+        .special-card:hover .special-content h3 {
+            transform: translateX(2px);
+        }
+        .special-content p {
+            font-size: 12px;
+            color: #e0e0e0; /* 辅助文字浅白色 */
+            line-height: 1.4;
+        }
+        /* 卡片按钮 */
+        .special-card button {
+            background-color: #fff; /* 按钮白色，对比更明显 */
+            color: #5a4ebb; /* 按钮文字用深蓝色 */
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .special-card button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background-color: #f0f8ff;
+        }
+        .special-card button:active {
+            transform: scale(0.98);
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">专项能力提升</div>
+
+        <!-- 顶部搜索栏 -->
+        <div class="search-bar">
+            <input type="text" placeholder="搜索专项课程/知识点" id="searchInput">
+        </div>
+
+        <!-- 顶部图片区 -->
+        <div class="top-imgs">
+            <div class="img-item" data-type="纠音">
+                <img src="listening-img.jpg" alt="纠音">
+                <div class="img-tag">纠音</div>
+            </div>
+            <div class="img-item" data-type="语用">
+                <img src="expression-img.jpg" alt="语用">
+                <div class="img-tag">语用</div>
+            </div>
+        </div>
+
+        <!-- 分类标签栏 -->
+        <div class="category-tabs">
+            <a href="javascript:;" class="active" data-category="语法">语法</a>
+            <a href="javascript:;" data-category="词汇">词汇</a>
+            <a href="javascript:;" data-category="句式">句式</a>
+        </div>
+
+        <!-- 专项卡片模块 - 完全仿照今日语伴格式 -->
+        <div class="special-section">
+            <div class="special-header">
+                <span>专项提升</span>
+                <a href="javascript:;" id="specialMore">更多 ></a>
+            </div>
+
+            <!-- 语法急救卡片 -->
+            <div class="special-card" data-special="语法急救">
+                <div class="card-icon">📚</div>
+                <div class="special-content">
+                    <h3>语法急救</h3>
+                    <p>实时剥离纠正语法错误，并提供正确范例</p>
+                </div>
+                <button class="specialBtn" data-btn="语法急救">开始学习</button>
+            </div>
+
+            <!-- 词汇升级卡片 -->
+            <div class="special-card" data-special="词汇升级">
+                <div class="card-icon">📖</div>
+                <div class="special-content">
+                    <h3>词汇升级</h3>
+                    <p>将用户常用简单词替换成更地道表达</p>
+                </div>
+                <button class="specialBtn" data-btn="词汇升级">开始学习</button>
+            </div>
+
+            <!-- 万能句式卡片 -->
+            <div class="special-card" data-special="万能句式">
+                <div class="card-icon">✍️</div>
+                <div class="special-content">
+                    <h3>万能句式</h3>
+                    <p>提供不同场景下万能句型，帮助快速组织语言</p>
+                </div>
+                <button class="specialBtn" data-btn="万能句式">开始学习</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“专项”栏 -->
+    <div class="bottom-nav">
+        <a href="javascript:;" class="nav-item" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="javascript:;" class="nav-item active" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('focus', () => {
+            showToast('输入语法/词汇/句式等关键词搜索专项课程');
+        });
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                showToast(`正在搜索：${e.target.value}`, 1000);
+            }
+        });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                showToast(`找到【${searchInput.value}】相关专项课程8个`);
+                searchInput.blur();
+            }
+        });
+
+        // 2. 顶部图片区交互
+        const imgItems = document.querySelectorAll('.top-imgs .img-item');
+        imgItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.dataset.type;
+                showToast(`选择【${type}】专项，正在加载专属训练内容...`);
+                
+                // 模拟点击后的高亮动画
+                item.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    item.style.transform = 'none';
+                }, 200);
+            });
+        });
+
+        // 3. 分类标签栏交互
+        const categoryLinks = document.querySelectorAll('.category-tabs a');
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                // 移除所有激活态
+                categoryLinks.forEach(t => t.classList.remove('active'));
+                // 添加当前激活态
+                link.classList.add('active');
+                
+                const category = link.dataset.category;
+                showToast(`已切换到【${category}】分类`);
+                
+                // 模拟根据分类筛选专项卡片
+                const specialCards = document.querySelectorAll('.special-card');
+                specialCards.forEach(card => {
+                    // 语法分类显示全部，词汇/句式只显示对应卡片
+                    if (category === '语法') {
+                        card.style.display = 'flex';
+                    } else if (category === '词汇' && card.dataset.special === '词汇升级') {
+                        card.style.display = 'flex';
+                    } else if (category === '句式' && card.dataset.special === '万能句式') {
+                        card.style.display = 'flex';
+                    } else if (category !== '语法') {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 4. 专项“更多”按钮交互
+        document.getElementById('specialMore').addEventListener('click', () => {
+            showToast('已加载全部专项课程，共12个');
+            
+            // 模拟显示更多卡片（临时添加一个示例卡片）
+            const specialSection = document.querySelector('.special-section');
+            const newCard = document.createElement('div');
+            newCard.className = 'special-card';
+            newCard.dataset.special = '口语流利度';
+            newCard.innerHTML = `
+                <div class="card-icon">🗣️</div>
+                <div class="special-content">
+                    <h3>口语流利度</h3>
+                    <p>提升口语表达流畅度，减少停顿和重复</p>
+                </div>
+                <button class="specialBtn" data-btn="口语流利度">开始学习</button>
+            `;
+            specialSection.appendChild(newCard);
+            
+            // 为新卡片绑定点击事件
+            newCard.addEventListener('click', () => {
+                showToast(`选择专项：${newCard.dataset.special}`);
+            });
+            newCard.querySelector('.specialBtn').addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                showToast(`开始学习【${newCard.dataset.special}】专项训练`);
+            });
+        });
+
+        // 5. 专项卡片交互
+        const specialCards = document.querySelectorAll('.special-card');
+        specialCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const specialName = card.dataset.special;
+                showToast(`选择专项：${specialName}`);
+            });
+        });
+
+        // 6. 专项卡片“开始学习”按钮交互
+        const specialBtns = document.querySelectorAll('.specialBtn');
+        specialBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡到卡片
+                const btnName = btn.dataset.btn;
+                showToast(`开始学习【${btnName}】专项训练，加油！`);
+                
+                // 按钮点击状态变化
+                btn.style.backgroundColor = '#5a4ebb';
+                btn.style.color = '#fff';
+                btn.textContent = '学习中...';
+                
+                setTimeout(() => {
+                    btn.style.backgroundColor = '#fff';
+                    btn.style.color = '#5a4ebb';
+                    btn.textContent = '开始学习';
+                }, 1500);
+            });
+        });
+
+        // 7. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 专项不重复提示，其他做提示
+                if (navName !== '专项') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持专项激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:nth-child(2)').classList.add('active');
+                } else {
+                    showToast('已在专项能力提升页面');
+                }
+            });
+        });
+    </script>
+        <div class="bottom-nav">
+        <a href="首页.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>
+</body>
+</html>

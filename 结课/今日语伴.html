@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今日语伴学习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 场景选择栏 */
+        .scene-section {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .scene-section::-webkit-scrollbar {
+            display: none;
+        }
+        .scene-btn {
+            padding: 8px 18px;
+            background-color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            border: none;
+            transition: all 0.2s;
+        }
+        .scene-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 10px rgba(90, 78, 187, 0.1);
+        }
+        .scene-btn.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+
+        /* 视频互动区域 */
+        .video-interact-section {
+            margin-bottom: 25px;
+        }
+        .video-card {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .video-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        /* 场景背景 */
+        .scene-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url('') center/cover no-repeat;
+            z-index: 1;
+            transition: all 0.5s;
+        }
+        .scene-bg.office {
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('') center/cover no-repeat;
+            background-color: #e8f0ff;
+        }
+        .scene-bg.restaurant {
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('') center/cover no-repeat;
+            background-color: #fff0e8;
+        }
+        .scene-bg.airport {
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('') center/cover no-repeat;
+            background-color: #e8fff8;
+        }
+        /* 实时表情反馈 */
+        .emotion-feedback {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .emotion-feedback.encourage {
+            color: #5a4ebb;
+        }
+        .emotion-feedback.confused {
+            color: #ff6b6b;
+        }
+        .emotion-feedback.happy {
+            color: #ffc107;
+        }
+
+        /* 字幕 & 内容区 */
+        .subtitle-section {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 3;
+        }
+        .subtitle-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .subtitle-mode {
+            display: flex;
+            gap: 8px;
+        }
+        .subtitle-btn {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: rgba(255,255,255,0.8);
+            color: #333;
+            transition: all 0.2s;
+        }
+        .subtitle-btn.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .word-collect-btn {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: rgba(255,255,255,0.8);
+            color: #5a4ebb;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .word-collect-btn:hover {
+            background-color: #e0e8ff;
+        }
+        /* 双语字幕栏 */
+        .subtitle-bar {
+            background-color: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .subtitle-bar.original-only {
+            color: #fff;
+        }
+        .subtitle-bar.translation-only {
+            color: #fff;
+        }
+        /* 重点词标注 */
+        .key-word {
+            color: #ffc107;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+        /* 对话脚本 */
+        .script-content {
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .script-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .script-btn {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .script-btn:hover {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+
+        /* 视频控制功能区 */
+        .video-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 10px;
+            position: relative;
+            z-index: 3;
+        }
+        .video-control-group {
+            display: flex;
+            gap: 10px;
+        }
+        .video-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: rgba(255,255,255,0.9);
+            color: #5a4ebb;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .video-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .play-btn {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .speed-control {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: rgba(255,255,255,0.9);
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .speed-control:hover {
+            background-color: #e0e8ff;
+        }
+
+        /* 对话互动区 */
+        .chat-interact-section {
+            margin-bottom: 25px;
+        }
+        .chat-card {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .chat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        /* 对话历史 */
+        .chat-history {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 12px;
+            background-color: #f8f9ff;
+        }
+        .chat-item {
+            margin-bottom: 12px;
+            max-width: 85%;
+        }
+        .chat-item.companion {
+            align-self: flex-start;
+        }
+        .chat-item.me {
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chat-bubble {
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        .chat-bubble.companion {
+            background-color: #e0e8ff;
+            color: #333;
+            border-top-left-radius: 5px;
+        }
+        .chat-bubble.me {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            border-top-right-radius: 5px;
+        }
+        .chat-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 3px;
+            padding: 0 10px;
+        }
+        /* 备选回复 */
+        .reply-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .reply-option {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #e0e8ff;
+            font-size: 14px;
+            color: #5a4ebb;
+            cursor: pointer;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+        .reply-option:hover {
+            background-color: #e0e8ff;
+            transform: scale(1.03);
+        }
+        .reply-option.selected {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            border-color: #5a4ebb;
+        }
+        /* 发言框区域 */
+        .input-area {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .voice-input-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .voice-input-btn.recording {
+            background-color: #ff6b6b;
+            color: #fff;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e0e8ff;
+            border-radius: 25px;
+            font-size: 14px;
+            resize: none;
+            height: 45px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .chat-input:focus {
+            border-color: #5a4ebb;
+            box-shadow: 0 0 0 2px rgba(90, 78, 187, 0.1);
+        }
+        .send-btn {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.2);
+        }
+        .send-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        /* 辅助功能按钮 */
+        .aux-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .aux-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .restart-btn {
+            background-color: #ffe8e8;
+            color: #ff6b6b;
+        }
+        .restart-btn:hover {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+        .analysis-btn {
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+        }
+        .analysis-btn:hover {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 解析弹窗样式 */
+        .analysis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .analysis-content {
+            width: 85%;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 25px 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .analysis-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .analysis-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .analysis-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .analysis-subtitle {
+            font-size: 16px;
+            color: #5a4ebb;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .analysis-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .close-analysis {
+            margin-top: 20px;
+            padding: 10px 0;
+            border-radius: 15px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+
+        /* 重点词释义弹窗 */
+        .word-modal {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1001;
+            min-width: 200px;
+            display: none;
+        }
+        .word-title {
+            font-size: 16px;
+            color: #5a4ebb;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .word-explain {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+        .word-example {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        /* ========== 仅修改这部分样式适配竖屏视频 ========== */
+        /* 语伴视频容器 - 改为竖屏比例 9:16，保留原有margin/圆角等属性 */
+        .companion-video {
+            position: relative;
+            width: 240px; /* 适配竖屏的宽度，保留margin:0 auto居中 */
+            height: calc(240px * 16 / 9); /* 9:16竖屏比例，自动计算高度 */
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0 auto;
+            background-color: #000; /* 竖屏视频两侧黑边用黑色更协调 */
+            z-index: 2; /* 恢复原有z-index，保证层级正确 */
+        }
+        /* 视频播放器样式 - 改为contain保证完整显示，保留原有position */
+        .video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 替换cover为contain，竖屏视频完整显示 */
+            object-position: center; /* 视频居中 */
+        }
+        /* 表情反馈 - 保留原有样式，仅确认层级 */
+        .emotion-feedback {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 24px;
+            z-index: 10;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 8px;
+            border-radius: 50%;
+        }
+        /* ========== 其余样式完全保留 ========== */
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 999;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        /* 解析弹窗样式 */
+        .analysis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 998;
+        }
+        .analysis-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        /* 重点词弹窗样式 */
+        .word-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 999;
+            min-width: 280px;
+        }
+        /* 按钮基础样式 */
+        .video-btn, .script-btn, .aux-btn {
+            cursor: pointer;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: #fff;
+            margin: 0 4px;
+        }
+        .key-word {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .reply-option {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 4px 0;
+            cursor: pointer;
+        }
+        .reply-option.selected {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">今日语伴学习</div>
+
+        <!-- 场景选择栏 -->
+        <div class="scene-section">
+            <button class="scene-btn active" data-scene="office">职场会议室</button>
+            <button class="scene-btn" data-scene="restaurant">餐厅点餐</button>
+            <button class="scene-btn" data-scene="airport">机场登机</button>
+        </div>
+
+        <!-- 视频互动区域（优化布局，适配竖屏） -->
+        <div class="video-interact-section">
+            <div class="video-card">
+                <!-- 场景背景 -->
+                <div class="scene-bg office" id="sceneBg"></div>
+                
+                <!-- 语伴视频窗口（核心：竖屏容器，移除muted属性） -->
+                <div class="companion-video" id="companionVideo">
+                    <video 
+                        id="companionVideoPlayer" 
+                        class="video-player"
+                        autoplay  <!-- 移除了muted属性 -->
+                        playsinline 
+                    >
+                        您的浏览器不支持 HTML5 视频播放，请升级浏览器！
+                    </video>
+                    <div class="emotion-feedback encourage" id="emotionFeedback">👍</div>
+                </div>
+
+                <!-- 字幕 & 内容区 -->
+                <div class="subtitle-section">
+                    <div class="subtitle-controls">
+                        <div class="subtitle-mode">
+                            <button class="subtitle-btn active" data-mode="both">双语</button>
+                            <button class="subtitle-btn" data-mode="original">原文</button>
+                            <button class="subtitle-btn" data-mode="translation">译文</button>
+                        </div>
+                        <button class="word-collect-btn" id="collectWordsBtn">
+                            <span>⭐</span>
+                            <span>收藏重点词</span>
+                        </button>
+                    </div>
+
+                    <!-- 双语字幕栏 -->
+                    <div class="subtitle-bar" id="subtitleBar">
+                        Could you please <span class="key-word" data-word="brief">brief</span> us on the project progress? 
+                        <br>
+                        您能为我们<span class="key-word" data-word="brief">简要介绍</span>一下项目进展吗？
+                    </div>
+
+                    <!-- 对话脚本 -->
+                    <div class="script-content" id="scriptContent">
+                        <strong>语伴：</strong> Could you please brief us on the project progress?<br>
+                        <strong>译文：</strong> 您能为我们简要介绍一下项目进展吗？<br><br>
+                        <strong>语伴：</strong> We need to discuss the next steps and timeline.<br>
+                        <strong>译文：</strong> 我们需要讨论下一步计划和时间安排。<br><br>
+                        <strong>语伴：</strong> Let's make sure we meet the deadline next month.<br>
+                        <strong>译文：</strong> 我们要确保在下个月截止日期前完成。
+                    </div>
+
+                    <div class="script-actions">
+                        <button class="script-btn" id="copyScriptBtn">
+                            <span>📋</span>
+                            <span>复制脚本</span>
+                        </button>
+                        <!-- 新增：切换视频片段按钮（对应两段视频） -->
+                        <button class="script-btn" id="switchVideoBtn">
+                            <span>🔄</span>
+                            <span>切换语句</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 视频控制功能区（新增音量按钮） -->
+                <div class="video-controls">
+                    <div class="video-control-group">
+                        <button class="video-btn play-btn" id="playPauseBtn">⏸️</button>
+                        <button class="video-btn" id="replayBtn">🔄</button>
+                        <button class="video-btn" id="volumeBtn">🔊</button> <!-- 新增音量按钮 -->
+                        <button class="speed-control" id="speedBtn">1.0x</button>
+                    </div>
+                    <div class="video-control-group">
+                        <button class="video-btn" id="fullscreenBtn">⛶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对话互动区 -->
+        <div class="chat-interact-section">
+            <div class="chat-card">
+                <!-- 对话历史 -->
+                <div class="chat-history" id="chatHistory">
+                    <div class="chat-item companion">
+                        <div class="chat-bubble companion">
+                            Could you please brief us on the project progress?
+                        </div>
+                        <div class="chat-time">09:00</div>
+                    </div>
+                </div>
+
+                <!-- 备选回复 -->
+                <div class="reply-options" id="replyOptions">
+                    <div class="reply-option" data-reply="Sure, I'll walk you through the key milestones.">Sure, I'll walk you through the key milestones.</div>
+                    <div class="reply-option" data-reply="The project is on track and 70% complete.">The project is on track and 70% complete.</div>
+                    <div class="reply-option" data-reply="I need to check the latest data first.">I need to check the latest data first.</div>
+                </div>
+
+                <!-- 发言框区域 -->
+                <div class="input-area">
+                    <button class="voice-input-btn" id="voiceInputBtn">🎤</button>
+                    <textarea class="chat-input" id="chatInput" placeholder="输入你的回复..."></textarea>
+                    <button class="send-btn" id="sendBtn">发送</button>
+                </div>
+
+                <!-- 辅助功能按钮 -->
+                <div class="aux-controls">
+                    <button class="aux-btn restart-btn" id="restartBtn">重新开始对话</button>
+                    <button class="aux-btn analysis-btn" id="analysisBtn">查看解析</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航（修复重复问题，改为a标签跳转） -->
+    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 解析弹窗 -->
+    <div class="analysis-modal" id="analysisModal">
+        <div class="analysis-content">
+            <div class="analysis-title">职场会议对话解析</div>
+            <div class="analysis-item">
+                <div class="analysis-subtitle">核心句式：Could you please...?</div>
+                <div class="analysis-text">
+                    用法：礼貌请求对方做某事，比 "Can you..." 更正式，适用于职场场景。<br>
+                    例句：Could you please send me the report by Friday?<br>
+                    译文：您能在周五前把报告发给我吗？
+                </div>
+            </div>
+            <div class="analysis-item">
+                <div class="analysis-subtitle">重点词汇：brief</div>
+                <div class="analysis-text">
+                    词性：verb / adj<br>
+                    含义：(v) 简要介绍；(adj) 简短的<br>
+                    搭配：brief sb on sth (向某人简要介绍某事)<br>
+                    例句：He briefed the team on the new policy.
+                </div>
+            </div>
+            <div class="analysis-item">
+                <div class="analysis-subtitle">语法要点：将来时的使用</div>
+                <div class="analysis-text">
+                    We need to discuss the next steps and timeline. 中使用 "need to do" 表示当前需要做的事情，
+                    Let's make sure we meet the deadline 中 "make sure + 从句" 表示确保某事发生，
+                    从句中用一般现在时表将来。
+                </div>
+            </div>
+            <button class="close-analysis" id="closeAnalysisBtn">关闭解析</button>
+        </div>
+    </div>
+
+    <!-- 重点词释义弹窗 -->
+    <div class="word-modal" id="wordModal">
+        <div class="word-title" id="wordTitle">brief</div>
+        <div class="word-explain" id="wordExplain">
+            vt. 简要介绍；adj. 简短的，简洁的
+        </div>
+        <div class="word-example" id="wordExample">
+            例句：She briefed the manager on the situation. (她向经理简要介绍了情况。)
+        </div>
+    </div>
+
+    <script>
+        // ========== 核心配置：各场景对应的两段视频路径（替换为你的本地MP4路径） ==========
+        const videoConfig = {
+            office: [
+                { 
+                    src: "回复1.mp4",  // 对应：Could you please brief us on the project progress?
+                    subtitle: 'Could you please <span class="key-word" data-word="brief">brief</span> us on the project progress? <br>您能为我们<span class="key-word" data-word="brief">简要介绍</span>一下项目进展吗？',
+                    chatInit: 'Could you please brief us on the project progress?'
+                },
+                { 
+                    src: "回复2.mp4",  // 对应：We need to discuss the next steps and timeline.
+                    subtitle: 'We need to discuss the next steps and <span class="key-word" data-word="timeline">timeline</span>. <br>我们需要讨论下一步计划和<span class="key-word" data-word="timeline">时间安排</span>。',
+                    chatInit: 'We need to discuss the next steps and timeline.'
+                }
+            ],
+            restaurant: [
+                { 
+                    src: "restaurant-video1.mp4",  // 对应：May I take your order now?
+                    subtitle: 'May I take your <span class="key-word" data-word="order">order</span> now? <br>请问现在可以为您<span class="key-word" data-word="order">点餐</span>了吗？',
+                    chatInit: 'May I take your order now?'
+                },
+                { 
+                    src: "restaurant-video2.mp4",  // 对应：Our special today is steak with mashed potatoes.
+                    subtitle: 'Our special today is steak with mashed <span class="key-word" data-word="potatoes">potatoes</span>. <br>我们今天的特色菜是牛排配<span class="key-word" data-word="potatoes">土豆泥</span>。',
+                    chatInit: 'Our special today is steak with mashed potatoes.'
+                }
+            ],
+            airport: [
+                { 
+                    src: "airport-video1.mp4",  // 对应：May I see your boarding pass and passport?
+                    subtitle: 'May I see your <span class="key-word" data-word="boarding">boarding</span> pass and passport? <br>请出示您的<span class="key-word" data-word="boarding">登机</span>牌和护照好吗？',
+                    chatInit: 'May I see your boarding pass and passport?'
+                },
+                { 
+                    src: "airport-video2.mp4",  // 对应：Your flight is boarding at gate 15 in 15 minutes.
+                    subtitle: 'Your flight is boarding at gate 15 in 15 <span class="key-word" data-word="minutes">minutes</span>. <br>您的航班15<span class="key-word" data-word="minutes">分钟</span>后在15号登机口登机。',
+                    chatInit: 'Your flight is boarding at gate 15 in 15 minutes.'
+                }
+            ]
+        };
+
+        // 全局状态：当前视频索引、当前场景视频列表、视频播放器实例
+        let currentVideoIndex = 0;
+        let currentSceneVideos = videoConfig.office;
+        const videoPlayer = document.getElementById('companionVideoPlayer');
+        
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // ========== 1. 初始化视频（页面加载时） ==========
+        function initVideo() {
+            // 加载当前场景第一个视频
+            videoPlayer.src = currentSceneVideos[currentVideoIndex].src;
+            // 页面加载时默认静音（规避浏览器自动播放限制）
+            videoPlayer.muted = true;
+            videoPlayer.play();
+            // 绑定视频播放结束事件（自动切换下一段）
+            videoPlayer.addEventListener('ended', () => {
+                switchVideo(); // 播放完自动切下一段
+            });
+        }
+        // 页面加载完成后初始化视频
+        document.addEventListener('DOMContentLoaded', initVideo);
+
+        // ========== 2. 场景选择交互（同步视频） ==========
+        const sceneBtns = document.querySelectorAll('.scene-btn');
+        const sceneBg = document.getElementById('sceneBg');
+        const emotionFeedback = document.getElementById('emotionFeedback');
+        const subtitleBar = document.getElementById('subtitleBar');
+        const scriptContent = document.getElementById('scriptContent');
+        const chatHistory = document.getElementById('chatHistory');
+
+        sceneBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 切换激活状态
+                sceneBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const scene = btn.dataset.scene;
+                showToast(`已切换到【${btn.textContent}】场景`);
+                
+                // 更新场景背景和视频配置
+                sceneBg.className = `scene-bg ${scene}`;
+                currentSceneVideos = videoConfig[scene];
+                currentVideoIndex = 0; // 重置为第一段视频
+                
+                // 更新语伴表情
+                if (scene === 'office') {
+                    emotionFeedback.className = 'emotion-feedback encourage';
+                    emotionFeedback.textContent = '👍';
+                    scriptContent.innerHTML = `
+                        <strong>语伴：</strong> Could you please brief us on the project progress?<br>
+                        <strong>译文：</strong> 您能为我们简要介绍一下项目进展吗？<br><br>
+                        <strong>语伴：</strong> We need to discuss the next steps and timeline.<br>
+                        <strong>译文：</strong> 我们需要讨论下一步计划和时间安排。<br><br>
+                        <strong>语伴：</strong> Let's make sure we meet the deadline next month.<br>
+                        <strong>译文：</strong> 我们要确保在下个月截止日期前完成。
+                    `;
+                } else if (scene === 'restaurant') {
+                    emotionFeedback.className = 'emotion-feedback happy';
+                    emotionFeedback.textContent = '😊';
+                    scriptContent.innerHTML = `
+                        <strong>语伴：</strong> May I take your order now?<br>
+                        <strong>译文：</strong> 请问现在可以为您点餐了吗？<br><br>
+                        <strong>语伴：</strong> Our special today is steak with mashed potatoes.<br>
+                        <strong>译文：</strong> 我们今天的特色菜是牛排配土豆泥。<br><br>
+                        <strong>语伴：</strong> Would you like anything to drink?<br>
+                        <strong>译文：</strong> 您想喝点什么吗？
+                    `;
+                } else if (scene === 'airport') {
+                    emotionFeedback.className = 'emotion-feedback encourage';
+                    emotionFeedback.textContent = '✈️';
+                    scriptContent.innerHTML = `
+                        <strong>语伴：</strong> May I see your boarding pass and passport?<br>
+                        <strong>译文：</strong> 请出示您的登机牌和护照好吗？<br><br>
+                        <strong>语伴：</strong> Your flight is boarding at gate 15 in 15 minutes.<br>
+                        <strong>译文：</strong> 您的航班15分钟后在15号登机口登机。<br><br>
+                        <strong>语伴：</strong> Please have your luggage ready for inspection.<br>
+                        <strong>译文：</strong> 请准备好您的行李接受检查。
+                    `;
+                }
+
+                // 更新字幕和视频
+                subtitleBar.innerHTML = currentSceneVideos[currentVideoIndex].subtitle;
+                videoPlayer.src = currentSceneVideos[currentVideoIndex].src;
+                videoPlayer.muted = true; // 切换场景后默认静音
+                videoPlayer.play();
+                // 重置对话历史
+                chatHistory.innerHTML = `
+                    <div class="chat-item companion">
+                        <div class="chat-bubble companion">
+                            ${currentSceneVideos[currentVideoIndex].chatInit}
+                        </div>
+                        <div class="chat-time">09:00</div>
+                    </div>
+                `;
+                // 重新绑定重点词点击事件
+                bindKeyWordEvents();
+                // 重置音量按钮状态
+                volumeBtn.textContent = '🔊';
+                isMuted = true;
+            });
+        });
+
+        // ========== 3. 视频播放/暂停交互（新增取消静音逻辑） ==========
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        playPauseBtn.addEventListener('click', () => {
+            if (videoPlayer.paused) {
+                // 播放：取消静音并开始播放
+                videoPlayer.muted = false;
+                videoPlayer.play();
+                playPauseBtn.textContent = '⏸️';
+                showToast('视频已继续播放（已开启声音）');
+                // 同步更新音量按钮状态
+                volumeBtn.textContent = '🔊';
+                isMuted = false;
+                // 恢复表情
+                if (sceneBg.classList.contains('office')) {
+                    emotionFeedback.textContent = '👍';
+                } else if (sceneBg.classList.contains('restaurant')) {
+                    emotionFeedback.textContent = '😊';
+                } else if (sceneBg.classList.contains('airport')) {
+                    emotionFeedback.textContent = '✈️';
+                }
+            } else {
+                // 暂停
+                videoPlayer.pause();
+                playPauseBtn.textContent = '▶️';
+                showToast('视频已暂停');
+                emotionFeedback.textContent = '⏸️';
+            }
+        });
+
+        // ========== 4. 重放当前片段交互（真实重播+声音） ==========
+        const replayBtn = document.getElementById('replayBtn');
+        replayBtn.addEventListener('click', () => {
+            showToast('正在重放当前对话片段...');
+            // 视频回到开头并播放（保留当前音量状态）
+            videoPlayer.currentTime = 0;
+            videoPlayer.play();
+            playPauseBtn.textContent = '⏸️';
+            // 恢复表情
+            if (sceneBg.classList.contains('office')) {
+                emotionFeedback.textContent = '👍';
+            } else if (sceneBg.classList.contains('restaurant')) {
+                emotionFeedback.textContent = '😊';
+            } else if (sceneBg.classList.contains('airport')) {
+                emotionFeedback.textContent = '✈️';
+            }
+            setTimeout(() => {
+                showToast('重放完成');
+            }, 800);
+        });
+
+        // ========== 5. 语速调节交互（真实控制播放速度） ==========
+        const speedBtn = document.getElementById('speedBtn');
+        let currentSpeed = 1.0;
+        const speeds = [0.8, 1.0, 1.2, 1.5]; // 扩展语速选项
+
+        speedBtn.addEventListener('click', () => {
+            const currentIndex = speeds.indexOf(currentSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            currentSpeed = speeds[nextIndex];
+            
+            // 真实设置视频播放速度
+            videoPlayer.playbackRate = currentSpeed;
+            speedBtn.textContent = `${currentSpeed}x`;
+            showToast(`已切换到 ${currentSpeed}x 语速`);
+        });
+
+        // ========== 6. 全屏模式交互（真实全屏） ==========
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const companionVideo = document.getElementById('companionVideo');
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                // 进入全屏
+                if (companionVideo.requestFullscreen) {
+                    companionVideo.requestFullscreen();
+                } else if (companionVideo.webkitRequestFullscreen) {
+                    companionVideo.webkitRequestFullscreen();
+                } else if (companionVideo.msRequestFullscreen) {
+                    companionVideo.msRequestFullscreen();
+                }
+                showToast('已进入全屏模式，按ESC退出');
+                fullscreenBtn.textContent = '📱';
+            } else {
+                // 退出全屏
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                showToast('已退出全屏模式');
+                fullscreenBtn.textContent = '⛶';
+            }
+        });
+
+        // ========== 7. 切换视频片段（两段视频手动切换+声音） ==========
+        const switchVideoBtn = document.getElementById('switchVideoBtn');
+        function switchVideo() {
+            // 切换视频索引（0 ↔ 1）
+            currentVideoIndex = (currentVideoIndex + 1) % currentSceneVideos.length;
+            // 更新视频、字幕、对话历史（保留当前音量状态）
+            videoPlayer.src = currentSceneVideos[currentVideoIndex].src;
+            videoPlayer.play();
+            playPauseBtn.textContent = '⏸️';
+            subtitleBar.innerHTML = currentSceneVideos[currentVideoIndex].subtitle;
+            // 更新对话历史第一条消息
+            chatHistory.innerHTML = `
+                <div class="chat-item companion">
+                    <div class="chat-bubble companion">
+                        ${currentSceneVideos[currentVideoIndex].chatInit}
+                    </div>
+                    <div class="chat-time">09:00</div>
+                </div>
+            `;
+            showToast(`已切换到第${currentVideoIndex + 1}段语句`);
+            // 重新绑定重点词事件
+            bindKeyWordEvents();
+        }
+        switchVideoBtn.addEventListener('click', switchVideo);
+
+        // ========== 8. 字幕模式切换交互（同步视频字幕） ==========
+        const subtitleBtns = document.querySelectorAll('.subtitle-btn');
+        subtitleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 切换激活状态
+                subtitleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const mode = btn.dataset.mode;
+                showToast(`已切换到【${btn.textContent}】字幕模式`);
+                
+                // 获取当前视频的字幕模板
+                let baseSubtitle = currentSceneVideos[currentVideoIndex].subtitle;
+                // 处理字幕显示模式
+                if (mode === 'original') {
+                    // 只显示原文（拆分<br>前的内容）
+                    baseSubtitle = baseSubtitle.split('<br>')[0];
+                } else if (mode === 'translation') {
+                    // 只显示译文（拆分<br>后的内容）
+                    baseSubtitle = baseSubtitle.split('<br>')[1] || baseSubtitle;
+                }
+                subtitleBar.innerHTML = baseSubtitle;
+                // 重新绑定重点词点击事件
+                bindKeyWordEvents();
+            });
+        });
+
+        // ========== 9. 重点词点击交互 ==========
+        const wordModal = document.getElementById('wordModal');
+        const wordTitle = document.getElementById('wordTitle');
+        const wordExplain = document.getElementById('wordExplain');
+        const wordExample = document.getElementById('wordExample');
+
+        function bindKeyWordEvents() {
+            const keyWords = document.querySelectorAll('.key-word');
+            keyWords.forEach(word => {
+                word.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 防止事件冒泡关闭弹窗
+                    const wordKey = word.dataset.word;
+                    showToast(`查看【${wordKey}】详细释义`);
+                    
+                    // 更新释义内容
+                    if (wordKey === 'brief') {
+                        wordTitle.textContent = 'brief';
+                        wordExplain.textContent = 'vt. 简要介绍；adj. 简短的，简洁的';
+                        wordExample.textContent = '例句：She briefed the manager on the situation. (她向经理简要介绍了情况。)';
+                    } else if (wordKey === 'order') {
+                        wordTitle.textContent = 'order';
+                        wordExplain.textContent = 'n. 订单，点餐；v. 命令，订购';
+                        wordExample.textContent = '例句：I would like to order a steak. (我想点一份牛排。)';
+                    } else if (wordKey === 'boarding') {
+                        wordTitle.textContent = 'boarding';
+                        wordExplain.textContent = 'n. 登机，上船；adj. 供膳的';
+                        wordExample.textContent = '例句：Boarding will begin in 10 minutes. (10分钟后开始登机。)';
+                    } else if (wordKey === 'timeline') {
+                        wordTitle.textContent = 'timeline';
+                        wordExplain.textContent = 'n. 时间轴，时间安排，日程表';
+                        wordExample.textContent = '例句：We need to set a clear timeline for the project. (我们需要为项目制定清晰的时间安排。)';
+                    } else if (wordKey === 'potatoes') {
+                        wordTitle.textContent = 'potatoes';
+                        wordExplain.textContent = 'n. 土豆，马铃薯（potato的复数）';
+                        wordExample.textContent = '例句：Mashed potatoes are my favorite side dish. (土豆泥是我最喜欢的配菜。)';
+                    } else if (wordKey === 'minutes') {
+                        wordTitle.textContent = 'minutes';
+                        wordExplain.textContent = 'n. 分钟；会议记录（minute的复数）';
+                        wordExample.textContent = '例句：Please arrive at the airport 30 minutes early. (请提前30分钟到达机场。)';
+                    }
+                    
+                    // 显示释义弹窗
+                    wordModal.style.display = 'block';
+                    
+                    // 点击空白处关闭
+                    document.addEventListener('click', (e) => {
+                        if (!wordModal.contains(e.target) && !e.target.classList.contains('key-word')) {
+                            wordModal.style.display = 'none';
+                        }
+                    }, { once: true });
+                });
+            });
+        }
+        // 初始化绑定重点词事件
+        bindKeyWordEvents();
+
+        // ========== 10. 收藏重点词交互 ==========
+        const collectWordsBtn = document.getElementById('collectWordsBtn');
+        let isCollected = false;
+        collectWordsBtn.addEventListener('click', () => {
+            if (isCollected) {
+                collectWordsBtn.innerHTML = `<span>⭐</span><span>收藏重点词</span>`;
+                showToast('已取消收藏所有重点词');
+                isCollected = false;
+            } else {
+                collectWordsBtn.innerHTML = `<span>★</span><span>已收藏重点词</span>`;
+                showToast('已将当前场景重点词加入词汇本');
+                isCollected = true;
+            }
+        });
+
+        // ========== 11. 复制脚本交互 ==========
+        const copyScriptBtn = document.getElementById('copyScriptBtn');
+        copyScriptBtn.addEventListener('click', () => {
+            showToast('正在复制对话脚本...');
+            // 复制到剪贴板
+            const text = scriptContent.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('对话脚本已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制成功！');
+            });
+        });
+
+        // ========== 12. 备选回复交互 ==========
+        const replyOptions = document.querySelectorAll('.reply-option');
+        const chatInput = document.getElementById('chatInput');
+        replyOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有选中状态
+                replyOptions.forEach(o => o.classList.remove('selected'));
+                // 添加当前选中状态
+                option.classList.add('selected');
+                // 填入输入框
+                chatInput.value = option.dataset.reply;
+                showToast('已选择快捷回复');
+            });
+        });
+
+        // ========== 13. 语音输入交互 ==========
+        const voiceInputBtn = document.getElementById('voiceInputBtn');
+        let isRecording = false;
+        voiceInputBtn.addEventListener('mousedown', () => {
+            if (!isRecording) {
+                voiceInputBtn.classList.add('recording');
+                voiceInputBtn.textContent = '🎙️';
+                showToast('长按说话，松开结束...');
+                isRecording = true;
+                // 模拟语音识别
+                setTimeout(() => {
+                    if (isRecording) {
+                        chatInput.value = "The project is on track and 70% complete.";
+                        showToast('语音识别完成，已填入输入框');
+                    }
+                }, 2000);
+            }
+        });
+        voiceInputBtn.addEventListener('mouseup', () => {
+            if (isRecording) {
+                voiceInputBtn.classList.remove('recording');
+                voiceInputBtn.textContent = '🎤';
+                isRecording = false;
+                showToast('录音已结束');
+            }
+        });
+        // 防止鼠标移开仍在录音
+        voiceInputBtn.addEventListener('mouseleave', () => {
+            if (isRecording) {
+                voiceInputBtn.classList.remove('recording');
+                voiceInputBtn.textContent = '🎤';
+                isRecording = false;
+                showToast('录音已结束');
+            }
+        });
+
+        // ========== 14. 发送回复交互 ==========
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) {
+                showToast('请输入或选择回复内容');
+                return;
+            }
+            // 添加到对话历史
+            const now = new Date();
+            const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            const myChat = document.createElement('div');
+            myChat.className = 'chat-item me';
+            myChat.innerHTML = `
+                <div class="chat-bubble me">
+                    ${message}
+                </div>
+                <div class="chat-time">${time}</div>
+            `;
+            chatHistory.appendChild(myChat);
+            // 清空输入框和备选回复选中状态
+            chatInput.value = '';
+            replyOptions.forEach(o => o.classList.remove('selected'));
+            // 滚动到底部
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            showToast('回复已发送');
+
+            // 模拟语伴回复
+            setTimeout(() => {
+                let companionReply = '';
+                if (sceneBg.classList.contains('office')) {
+                    companionReply = "Thank you for the update. Let's discuss the remaining tasks.";
+                } else if (sceneBg.classList.contains('restaurant')) {
+                    companionReply = "Great choice! Your order will be ready in 15 minutes.";
+                } else if (sceneBg.classList.contains('airport')) {
+                    companionReply = "Thank you. Have a pleasant flight!";
+                }
+                const companionChat = document.createElement('div');
+                companionChat.className = 'chat-item companion';
+                companionChat.innerHTML = `
+                    <div class="chat-bubble companion">
+                        ${companionReply}
+                    </div>
+                    <div class="chat-time">${time}</div>
+                `;
+                chatHistory.appendChild(companionChat);
+                // 滚动到底部
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                // 更新语伴表情
+                emotionFeedback.textContent = '😊';
+                showToast('语伴已回复');
+            }, 1500);
+        }
+
+        // ========== 15. 重新开始对话交互 ==========
+        const restartBtn = document.getElementById('restartBtn');
+        restartBtn.addEventListener('click', () => {
+            showToast('确定要重新开始对话吗？再次点击确认', 3000);
+            // 二次确认
+            let confirmed = false;
+            restartBtn.addEventListener('click', () => {
+                if (!confirmed) {
+                    confirmed = true;
+                    showToast('正在重置对话流程...');
+                    // 清空对话历史
+                    chatHistory.innerHTML = `
+                        <div class="chat-item companion">
+                            <div class="chat-bubble companion">
+                                ${currentSceneVideos[currentVideoIndex].chatInit}
+                            </div>
+                            <div class="chat-time">09:00</div>
+                        </div>
+                    `;
+                    // 清空输入框
+                    chatInput.value = '';
+                    // 重置备选回复选中状态
+                    replyOptions.forEach(o => o.classList.remove('selected'));
+                    // 重置视频（恢复静音）
+                    videoPlayer.currentTime = 0;
+                    videoPlayer.muted = true;
+                    videoPlayer.play();
+                    playPauseBtn.textContent = '⏸️';
+                    // 重置音量按钮
+                    volumeBtn.textContent = '🔊';
+                    isMuted = true;
+                    // 重置表情
+                    if (sceneBg.classList.contains('office')) {
+                        emotionFeedback.textContent = '👍';
+                    } else if (sceneBg.classList.contains('restaurant')) {
+                        emotionFeedback.textContent = '😊';
+                    } else if (sceneBg.classList.contains('airport')) {
+                        emotionFeedback.textContent = '✈️';
+                    }
+                    setTimeout(() => {
+                        showToast('对话已重新开始');
+                    }, 800);
+                }
+            }, { once: true });
+        });
+
+        // ========== 16. 查看解析交互 ==========
+        const analysisBtn = document.getElementById('analysisBtn');
+        const analysisModal = document.getElementById('analysisModal');
+        const closeAnalysisBtn = document.getElementById('closeAnalysisBtn');
+        analysisBtn.addEventListener('click', () => {
+            showToast('加载对话解析内容...');
+            setTimeout(() => {
+                analysisModal.style.display = 'flex';
+                showToast('解析内容加载完成');
+            }, 800);
+        });
+        closeAnalysisBtn.addEventListener('click', () => {
+            analysisModal.style.display = 'none';
+            showToast('已关闭解析内容');
+        });
+        // 点击弹窗外部关闭
+        analysisModal.addEventListener('click', (e) => {
+            if (e.target === analysisModal) {
+                analysisModal.style.display = 'none';
+                showToast('已关闭解析内容');
+            }
+        });
+
+        // ========== 17. 底部导航交互 ==========
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const navName = item.dataset.nav;
+                // 首页不重复提示（阻止默认跳转仅做提示，如需跳转可删除e.preventDefault()）
+                if (navName !== '首页') {
+                    showToast(`即将进入【${navName}】页面`);
+                } else {
+                    e.preventDefault(); // 阻止首页重复跳转
+                    showToast('已在首页页面');
+                }
+            });
+        });
+
+        // ========== 新增：音量控制按钮交互 ==========
+        const volumeBtn = document.getElementById('volumeBtn');
+        let isMuted = true; // 初始静音状态
+        volumeBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            videoPlayer.muted = isMuted;
+            volumeBtn.textContent = isMuted ? '🔇' : '🔊';
+            showToast(isMuted ? '已静音' : '已开启声音');
+            // 同步更新播放按钮状态（如果静音时播放，自动显示暂停图标）
+            if (!isMuted && videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseBtn.textContent = '⏸️';
+            }
+        });
+
+        // ========== 新增：首次页面点击自动取消静音（增强体验） ==========
+        document.addEventListener('click', () => {
+            // 仅首次点击时提示
+            showToast('已解锁声音播放权限', 1500);
+        }, { once: true });
+    </script>
+</body>
+</html>

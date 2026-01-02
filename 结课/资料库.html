@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>资料库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 顶部搜索栏 - 强化设计感 */
+        .search-bar {
+            padding: 10px 0;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 40px;
+            padding-right: 100px; /* 给搜索按钮留空间 */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+            transform: scale(1.01);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 18px;
+            font-size: 18px;
+            color: #5a4ebb;
+        }
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: #5a4ebb;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.3);
+            background-color: #312fac;
+        }
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 资料分类栏 - 带背景设计 */
+        .category-section {
+            margin-bottom: 25px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .category-tab {
+            flex: 0 0 auto;
+            width: 100px;
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .category-tab .tab-icon {
+            width: 36px;
+            height: 36px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .category-tab:hover .tab-icon {
+            transform: scale(1.1);
+        }
+        .category-tab span {
+            font-size: 12px;
+            display: block;
+        }
+        .category-tab.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .category-tab.active .tab-icon {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        /* 通用卡片样式 - 统一设计语言 */
+        .content-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .content-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .card-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .card-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+
+        /* 我的收藏模块 */
+        .collection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .collection-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .collection-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 5px;
+            border-radius: 10px;
+        }
+        .collection-item:last-child {
+            border-bottom: none;
+        }
+        .collection-item .item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .collection-item:hover .item-icon {
+            background-color: #d0d8ff;
+            transform: scale(1.05);
+        }
+        .collection-item .item-content {
+            flex: 1;
+        }
+        .collection-item .item-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .collection-item .item-desc {
+            font-size: 12px;
+            color: #999;
+        }
+        .collection-item .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        .collect-btn {
+            background-color: #ffe8e8;
+            color: #ff6b6b;
+        }
+        .collect-btn.active {
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+        .download-btn {
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+        }
+
+        /* 热门资料榜模块 */
+        .hot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .hot-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+            padding: 8px 0;
+            border-radius: 10px;
+        }
+        .hot-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 5px;
+        }
+        .hot-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .hot-item:hover .hot-rank {
+            transform: scale(1.1);
+            box-shadow: 0 0 8px rgba(90, 78, 187, 0.3);
+        }
+        .hot-item .item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background-color: #e0e8ff;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .hot-item:hover .item-img {
+            transform: scale(1.03);
+        }
+        .hot-item .item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hot-item .item-content {
+            flex: 1;
+        }
+        .hot-item .item-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .hot-item .item-meta {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            gap: 10px;
+        }
+        .hot-item .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">资料库</div>
+
+        <!-- 顶部搜索栏（带搜索按钮） -->
+        <div class="search-bar">
+            <input type="text" placeholder="搜索资料/关键词/场景" id="searchInput">
+            <button class="search-btn" id="searchBtn">搜索资料</button>
+        </div>
+
+        <!-- 资料分类栏 -->
+        <div class="category-section">
+            <div class="section-header">
+                <span>资料分类</span>
+            </div>
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="词汇表">
+                    <div class="tab-icon">📖</div>
+                    <span>词汇表</span>
+                </div>
+                <div class="category-tab" data-category="语法手册">
+                    <div class="tab-icon">📚</div>
+                    <span>语法手册</span>
+                </div>
+                <div class="category-tab" data-category="场景模板">
+                    <div class="tab-icon">🎯</div>
+                    <span>场景模板</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的收藏模块 -->
+        <div class="content-card">
+            <div class="card-header">
+                <h3>我的收藏</h3>
+                <a href="javascript:;" class="more-link" id="collectionMore">查看全部 ></a>
+            </div>
+            <div class="collection-list" id="collectionList">
+                <!-- 收藏项1 -->
+                <div class="collection-item" data-collection="高频商务词汇表">
+                    <div class="item-icon">📝</div>
+                    <div class="item-content">
+                        <div class="item-title">高频商务词汇表</div>
+                        <div class="item-desc">2000+核心商务场景词汇</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="高频商务词汇表">⭐</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="高频商务词汇表">⬇️</button>
+                    </div>
+                </div>
+                <!-- 收藏项2 -->
+                <div class="collection-item" data-collection="旅游场景万能句式">
+                    <div class="item-icon">📋</div>
+                    <div class="item-content">
+                        <div class="item-title">旅游场景万能句式</div>
+                        <div class="item-desc">50+常用旅游沟通模板</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="旅游场景万能句式">⭐</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="旅游场景万能句式">⬇️</button>
+                    </div>
+                </div>
+                <!-- 收藏项3 -->
+                <div class="collection-item" data-collection="英语语法速记手册">
+                    <div class="item-icon">📘</div>
+                    <div class="item-content">
+                        <div class="item-title">英语语法速记手册</div>
+                        <div class="item-desc">涵盖90%基础语法知识点</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="英语语法速记手册">⭐</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="英语语法速记手册">⬇️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 热门资料榜模块 -->
+        <div class="content-card">
+            <div class="card-header">
+                <h3>热门资料榜</h3>
+                <a href="javascript:;" class="more-link" id="hotMore">完整榜单 ></a>
+            </div>
+            <div class="hot-list" id="hotList">
+                <!-- 热门项1 -->
+                <div class="hot-item" data-hot="日常口语8000句">
+                    <div class="hot-rank">1</div>
+                    <div class="item-img">
+                        <img src="hot-img1.jpg" alt="热门资料封面">
+                    </div>
+                    <div class="item-content">
+                        <div class="item-title">日常口语8000句</div>
+                        <div class="item-meta">
+                            <span>下载量 12.5万+</span>
+                            <span>离线版 ✔️</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="日常口语8000句">收藏</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="日常口语8000句">下载</button>
+                    </div>
+                </div>
+                <!-- 热门项2 -->
+                <div class="hot-item" data-hot="商务谈判实用语法">
+                    <div class="hot-rank">2</div>
+                    <div class="item-img">
+                        <img src="hot-img2.jpg" alt="热门资料封面">
+                    </div>
+                    <div class="item-content">
+                        <div class="item-title">商务谈判实用语法</div>
+                        <div class="item-meta">
+                            <span>下载量 8.8万+</span>
+                            <span>离线版 ✔️</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="商务谈判实用语法">收藏</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="商务谈判实用语法">下载</button>
+                    </div>
+                </div>
+                <!-- 热门项3 -->
+                <div class="hot-item" data-hot="雅思高频词汇大全">
+                    <div class="hot-rank">3</div>
+                    <div class="item-img">
+                        <img src="hot-img3.jpg" alt="热门资料封面">
+                    </div>
+                    <div class="item-content">
+                        <div class="item-title">雅思高频词汇大全</div>
+                        <div class="item-meta">
+                            <span>下载量 7.2万+</span>
+                            <span>离线版 ✔️</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn collect-btn" data-action="collect" data-item="雅思高频词汇大全">收藏</button>
+                        <button class="action-btn download-btn" data-action="download" data-item="雅思高频词汇大全">下载</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“资料库”栏 -->
+    <div class="bottom-nav">
+        <a href="javascript:;" class="nav-item" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="javascript:;" class="nav-item active" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        
+        searchInput.addEventListener('focus', () => {
+            showToast('输入资料名称/关键词即可搜索');
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                showToast(`正在匹配：${e.target.value}`, 1000);
+            }
+        });
+        
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                searchHandler();
+            }
+        });
+        
+        // 搜索按钮点击事件
+        searchBtn.addEventListener('click', searchHandler);
+        
+        function searchHandler() {
+            const keyword = searchInput.value.trim();
+            if (!keyword) {
+                showToast('请输入搜索关键词');
+                return;
+            }
+            
+            // 禁用按钮防止重复点击
+            searchBtn.disabled = true;
+            searchBtn.textContent = '搜索中...';
+            
+            setTimeout(() => {
+                showToast(`找到【${keyword}】相关资料15个`);
+                searchInput.blur();
+                searchBtn.disabled = false;
+                searchBtn.textContent = '搜索资料';
+            }, 800);
+        }
+
+        // 2. 资料分类标签交互
+        const categoryTabs = document.querySelectorAll('.category-tab');
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有激活态
+                categoryTabs.forEach(t => t.classList.remove('active'));
+                // 添加当前激活态
+                tab.classList.add('active');
+                
+                const category = tab.dataset.category;
+                showToast(`已切换到【${category}】分类`);
+                
+                // 模拟根据分类筛选收藏和热门列表
+                filterContentByCategory(category);
+            });
+        });
+
+        // 模拟根据分类筛选内容
+        function filterContentByCategory(category) {
+            // 收藏列表筛选
+            const collectionItems = document.querySelectorAll('.collection-item');
+            collectionItems.forEach(item => {
+                const title = item.dataset.collection;
+                if (category === '词汇表' && title.includes('词汇') ||
+                    category === '语法手册' && title.includes('语法') ||
+                    category === '场景模板' && title.includes('句式') ||
+                    category === '词汇表' && title.includes('词汇表')) {
+                    item.style.display = 'flex';
+                } else if (category !== '词汇表') {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 热门列表筛选
+            const hotItems = document.querySelectorAll('.hot-item');
+            hotItems.forEach(item => {
+                const title = item.dataset.hot;
+                if (category === '词汇表' && title.includes('词汇') ||
+                    category === '语法手册' && title.includes('语法') ||
+                    category === '场景模板' && title.includes('口语') ||
+                    category === '词汇表') {
+                    item.style.display = 'flex';
+                } else if (category !== '词汇表') {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 3. 我的收藏“查看全部”交互
+        document.getElementById('collectionMore').addEventListener('click', () => {
+            showToast('已加载全部收藏，共8个资料');
+            
+            // 模拟添加新的收藏项
+            const collectionList = document.getElementById('collectionList');
+            const newItem = document.createElement('div');
+            newItem.className = 'collection-item';
+            newItem.dataset.collection = '职场邮件写作模板';
+            newItem.innerHTML = `
+                <div class="item-icon">✉️</div>
+                <div class="item-content">
+                    <div class="item-title">职场邮件写作模板</div>
+                    <div class="item-desc">30+专业商务邮件模板</div>
+                </div>
+                <div class="item-actions">
+                    <button class="action-btn collect-btn" data-action="collect" data-item="职场邮件写作模板">⭐</button>
+                    <button class="action-btn download-btn" data-action="download" data-item="职场邮件写作模板">⬇️</button>
+                </div>
+            `;
+            collectionList.appendChild(newItem);
+            
+            // 为新项绑定事件
+            bindCollectionItemEvents(newItem);
+        });
+
+        // 4. 收藏项点击交互
+        function bindCollectionItemEvents(item) {
+            // 收藏项整体点击
+            item.addEventListener('click', () => {
+                const title = item.dataset.collection || item.dataset.hot;
+                showToast(`查看资料：${title}`);
+            });
+            
+            // 收藏/下载按钮点击
+            const actionBtns = item.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    const action = btn.dataset.action;
+                    const itemName = btn.dataset.item;
+                    
+                    if (action === 'collect') {
+                        // 切换收藏状态
+                        btn.classList.toggle('active');
+                        if (btn.classList.contains('active')) {
+                            showToast(`已收藏【${itemName}】`);
+                            btn.textContent = '★';
+                        } else {
+                            showToast(`已取消收藏【${itemName}】`);
+                            btn.textContent = '⭐';
+                        }
+                    } else if (action === 'download') {
+                        showToast(`开始下载【${itemName}】...`);
+                        
+                        // 按钮状态变化
+                        btn.style.backgroundColor = '#5a4ebb';
+                        btn.style.color = '#fff';
+                        btn.textContent = '↓';
+                        
+                        setTimeout(() => {
+                            showToast(`【${itemName}】下载完成，已保存到本地`);
+                            btn.style.backgroundColor = '';
+                            btn.style.color = '';
+                            btn.textContent = '⬇️';
+                        }, 1500);
+                    }
+                });
+            });
+        }
+
+        // 初始化绑定收藏项事件
+        document.querySelectorAll('.collection-item').forEach(item => {
+            bindCollectionItemEvents(item);
+        });
+
+        // 5. 热门资料榜“完整榜单”交互
+        document.getElementById('hotMore').addEventListener('click', () => {
+            showToast('已加载完整热门榜单，共20个资料');
+            
+            // 模拟添加新的热门项
+            const hotList = document.getElementById('hotList');
+            const newItem = document.createElement('div');
+            newItem.className = 'hot-item';
+            newItem.dataset.hot = '四六级核心词汇';
+            newItem.innerHTML = `
+                <div class="hot-rank">4</div>
+                <div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;color:#5a4ebb">📕</div>
+                <div class="item-content">
+                    <div class="item-title">四六级核心词汇</div>
+                    <div class="item-meta">
+                        <span>下载量 6.5万+</span>
+                        <span>离线版 ✔️</span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button class="action-btn collect-btn" data-action="collect" data-item="四六级核心词汇">收藏</button>
+                    <button class="action-btn download-btn" data-action="download" data-item="四六级核心词汇">下载</button>
+                </div>
+            `;
+            hotList.appendChild(newItem);
+            
+            // 为新项绑定事件
+            bindCollectionItemEvents(newItem);
+        });
+
+        // 初始化绑定热门项事件
+        document.querySelectorAll('.hot-item').forEach(item => {
+            bindCollectionItemEvents(item);
+        });
+
+        // 6. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 资料库不重复提示
+                if (navName !== '资料库') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持资料库激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:nth-child(3)').classList.add('active');
+                } else {
+                    showToast('已在资料库页面');
+                }
+            });
+        });
+    </script>
+    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>

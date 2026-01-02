@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自由话题</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 顶部搜索+功能栏 */
+        .top-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-bar {
+            flex: 1;
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+            transform: scale(1.01);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 12px;
+            font-size: 18px;
+            color: #5a4ebb;
+        }
+        .filter-btn {
+            background-color: #5a4ebb;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            padding: 0 15px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.2);
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 10px rgba(90, 78, 187, 0.3);
+            background-color: #312fac;
+        }
+        .filter-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 发起新话题模块 */
+        .create-topic-section {
+            margin-bottom: 25px;
+        }
+        .create-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .create-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .create-input {
+            width: 100%;
+            border: 1px solid #e0e8ff;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            resize: none;
+            min-height: 80px;
+            font-family: "微软雅黑", sans-serif;
+            transition: all 0.2s;
+        }
+        .create-input:focus {
+            outline: none;
+            border-color: #5a4ebb;
+            box-shadow: 0 0 8px rgba(90, 78, 187, 0.1);
+        }
+        .create-btn {
+            width: 100%;
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(49, 47, 172, 0.2);
+            transition: all 0.2s;
+        }
+        .create-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(49, 47, 172, 0.25);
+        }
+        .create-btn:active {
+            transform: scale(0.98);
+        }
+        .create-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 话题分类区 */
+        .category-section {
+            margin-bottom: 25px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .section-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .section-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .category-tab {
+            padding: 8px 18px;
+            background-color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .category-tab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .category-tab.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .category-item {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #f8f9ff;
+        }
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 20px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .category-item:hover .category-icon {
+            transform: scale(1.1);
+            background-color: #d0d8ff;
+        }
+        .category-text {
+            font-size: 12px;
+            display: block;
+        }
+
+        /* 热门话题榜 */
+        .hot-topic-section {
+            margin-bottom: 25px;
+        }
+        .hot-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .hot-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .hot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .hot-item {
+            display: flex;
+            gap: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .hot-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 5px;
+            border-radius: 10px;
+        }
+        .hot-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .hot-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .hot-item:hover .hot-rank {
+            transform: scale(1.1);
+            box-shadow: 0 0 8px rgba(90, 78, 187, 0.3);
+        }
+        .hot-content {
+            flex: 1;
+        }
+        .hot-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .hot-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #999;
+        }
+        .hot-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .join-btn {
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .join-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .join-btn.joined {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+
+        /* 我的话题草稿 */
+        .draft-section {
+            margin-bottom: 20px;
+        }
+        .draft-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .draft-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .draft-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .draft-item {
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            background-color: #f8f9ff;
+            transition: all 0.2s;
+        }
+        .draft-item:hover {
+            border-color: #e0e8ff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .draft-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .draft-desc {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .draft-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .draft-btn {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .draft-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .edit-btn {
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+        }
+        .delete-btn {
+            background-color: #ffe8e8;
+            color: #ff6b6b;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 筛选弹窗样式 */
+        .filter-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .filter-content {
+            width: 85%;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 25px 20px;
+        }
+        .filter-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .filter-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #f8f9ff;
+        }
+        .filter-text {
+            font-size: 14px;
+            color: #333;
+        }
+        .filter-switch {
+            width: 40px;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-switch.active {
+            background-color: #5a4ebb;
+        }
+        .filter-switch::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #fff;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s;
+        }
+        .filter-switch.active::after {
+            left: 22px;
+        }
+        .filter-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-btn-common {
+            flex: 1;
+            padding: 10px 0;
+            border-radius: 15px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .reset-btn {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        .confirm-btn {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">自由话题</div>
+
+        <!-- 顶部搜索+筛选栏 -->
+        <div class="top-bar">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索话题/关键词" id="searchInput">
+            </div>
+            <button class="filter-btn" id="filterBtn">
+                <span>筛选</span>
+                <span>⚙️</span>
+            </button>
+        </div>
+
+        <!-- 发起新话题模块 -->
+        <div class="create-topic-section">
+            <div class="create-card">
+                <textarea class="create-input" placeholder="分享你的学习疑问、心得体会，发起新的英语交流话题..." id="topicInput"></textarea>
+                <button class="create-btn" id="createBtn">发起新话题</button>
+            </div>
+        </div>
+
+        <!-- 话题分类区 -->
+        <div class="category-section">
+            <div class="section-header">
+                <span>话题分类</span>
+                <a href="javascript:;" class="more-link" id="categoryMore">查看全部 ></a>
+            </div>
+            
+            <!-- 分类标签（场景/难度） -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-type="scene">按场景</div>
+                <div class="category-tab" data-type="level">按难度</div>
+            </div>
+            
+            <!-- 场景分类网格 -->
+            <div class="category-grid" id="categoryGrid">
+                <!-- 职场 -->
+                <div class="category-item" data-category="职场">
+                    <div class="category-icon">💼</div>
+                    <span class="category-text">职场</span>
+                </div>
+                <!-- 生活 -->
+                <div class="category-item" data-category="生活">
+                    <div class="category-icon">🏠</div>
+                    <span class="category-text">生活</span>
+                </div>
+                <!-- 旅游 -->
+                <div class="category-item" data-category="旅游">
+                    <div class="category-icon">✈️</div>
+                    <span class="category-text">旅游</span>
+                </div>
+                <!-- 入门 -->
+                <div class="category-item" data-category="入门">
+                    <div class="category-icon">🥇</div>
+                    <span class="category-text">入门</span>
+                </div>
+                <!-- 进阶 -->
+                <div class="category-item" data-category="进阶">
+                    <div class="category-icon">🥈</div>
+                    <span class="category-text">进阶</span>
+                </div>
+                <!-- 精通 -->
+                <div class="category-item" data-category="精通">
+                    <div class="category-icon">🥉</div>
+                    <span class="category-text">精通</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 热门话题榜 -->
+        <div class="hot-topic-section">
+            <div class="section-header">
+                <span>热门话题榜</span>
+                <a href="javascript:;" class="more-link" id="hotMore">完整榜单 ></a>
+            </div>
+            <div class="hot-card">
+                <div class="hot-list" id="hotList">
+                    <!-- 热门话题1 -->
+                    <div class="hot-item" data-topic="如何快速提升商务英语谈判能力？分享你的实用技巧">
+                        <div class="hot-rank">1</div>
+                        <div class="hot-content">
+                            <div class="hot-title">如何快速提升商务英语谈判能力？分享你的实用技巧</div>
+                            <div class="hot-meta">
+                                <span>讨论量：2580</span>
+                                <span>参与人数：1256</span>
+                            </div>
+                        </div>
+                        <div class="hot-actions">
+                            <button class="join-btn" data-topic="商务英语谈判">加入讨论</button>
+                        </div>
+                    </div>
+                    <!-- 热门话题2 -->
+                    <div class="hot-item" data-topic="旅游英语中最容易出错的10个常用表达，你中招了吗？">
+                        <div class="hot-rank">2</div>
+                        <div class="hot-content">
+                            <div class="hot-title">旅游英语中最容易出错的10个常用表达，你中招了吗？</div>
+                            <div class="hot-meta">
+                                <span>讨论量：1890</span>
+                                <span>参与人数：987</span>
+                            </div>
+                        </div>
+                        <div class="hot-actions">
+                            <button class="join-btn" data-topic="旅游英语表达">加入讨论</button>
+                        </div>
+                    </div>
+                    <!-- 热门话题3 -->
+                    <div class="hot-item" data-topic="入门级英语学习者如何有效积累词汇量？拒绝死记硬背">
+                        <div class="hot-rank">3</div>
+                        <div class="hot-content">
+                            <div class="hot-title">入门级英语学习者如何有效积累词汇量？拒绝死记硬背</div>
+                            <div class="hot-meta">
+                                <span>讨论量：1560</span>
+                                <span>参与人数：842</span>
+                            </div>
+                        </div>
+                        <div class="hot-actions">
+                            <button class="join-btn" data-topic="入门词汇积累">加入讨论</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的话题草稿 -->
+        <div class="draft-section">
+            <div class="section-header">
+                <span>我的话题草稿</span>
+                <a href="javascript:;" class="more-link" id="draftMore">管理草稿 ></a>
+            </div>
+            <div class="draft-card">
+                <div class="draft-list" id="draftList">
+                    <!-- 草稿1 -->
+                    <div class="draft-item" data-draft="关于英语听力提升的几个疑问">
+                        <div class="draft-title">关于英语听力提升的几个疑问</div>
+                        <div class="draft-desc">为什么听单个单词能听懂，但是听整段对话就跟不上了？有没有好的训练方法...</div>
+                        <div class="draft-actions">
+                            <button class="draft-btn edit-btn" data-action="edit" data-draft="听力提升疑问">编辑</button>
+                            <button class="draft-btn delete-btn" data-action="delete" data-draft="听力提升疑问">删除</button>
+                        </div>
+                    </div>
+                    <!-- 草稿2 -->
+                    <div class="draft-item" data-draft="分享几个实用的职场英语邮件模板">
+                        <div class="draft-title">分享几个实用的职场英语邮件模板</div>
+                        <div class="draft-desc">整理了一些日常工作中常用的邮件模板，包括邀约、回复、催办等场景...</div>
+                        <div class="draft-actions">
+                            <button class="draft-btn edit-btn" data-action="edit" data-draft="职场邮件模板">编辑</button>
+                            <button class="draft-btn delete-btn" data-action="delete" data-draft="职场邮件模板">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“首页”栏 -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </div>
+        <div class="nav-item" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </div>
+        <div class="nav-item" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </div>
+        <div class="nav-item" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 筛选弹窗 -->
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-content">
+            <div class="filter-title">话题筛选</div>
+            <div class="filter-options">
+                <div class="filter-option">
+                    <div class="filter-text">只看热门话题</div>
+                    <div class="filter-switch" id="hotSwitch"></div>
+                </div>
+                <div class="filter-option">
+                    <div class="filter-text">只看最新发布</div>
+                    <div class="filter-switch" id="newSwitch"></div>
+                </div>
+                <div class="filter-option">
+                    <div class="filter-text">只看已参与的话题</div>
+                    <div class="filter-switch" id="joinedSwitch"></div>
+                </div>
+            </div>
+            <div class="filter-btns">
+                <button class="filter-btn-common reset-btn" id="resetBtn">重置</button>
+                <button class="filter-btn-common confirm-btn" id="confirmBtn">确认筛选</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('focus', () => {
+            showToast('输入话题名称/关键词即可搜索');
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                showToast(`正在匹配：${e.target.value}`, 1000);
+            }
+        });
+        
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                searchHandler();
+            }
+        });
+        
+        // 搜索处理函数
+        function searchHandler() {
+            const keyword = searchInput.value.trim();
+            if (!keyword) {
+                showToast('请输入搜索关键词');
+                return;
+            }
+            
+            showToast(`正在搜索【${keyword}】相关话题...`);
+            
+            setTimeout(() => {
+                showToast(`找到【${keyword}】相关话题18个`);
+                searchInput.blur();
+            }, 800);
+        }
+
+        // 2. 筛选按钮交互
+        const filterBtn = document.getElementById('filterBtn');
+        const filterModal = document.getElementById('filterModal');
+        const resetBtn = document.getElementById('resetBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const hotSwitch = document.getElementById('hotSwitch');
+        const newSwitch = document.getElementById('newSwitch');
+        const joinedSwitch = document.getElementById('joinedSwitch');
+
+        // 打开筛选弹窗
+        filterBtn.addEventListener('click', () => {
+            showToast('打开话题筛选面板');
+            filterModal.style.display = 'flex';
+        });
+
+        // 筛选开关切换
+        [hotSwitch, newSwitch, joinedSwitch].forEach(switchEl => {
+            switchEl.addEventListener('click', () => {
+                switchEl.classList.toggle('active');
+                const switchText = switchEl.parentElement.querySelector('.filter-text').textContent;
+                showToast(`${switchEl.classList.contains('active') ? '开启' : '关闭'}：${switchText}`, 1000);
+            });
+        });
+
+        // 重置筛选
+        resetBtn.addEventListener('click', () => {
+            [hotSwitch, newSwitch, joinedSwitch].forEach(switchEl => {
+                switchEl.classList.remove('active');
+            });
+            showToast('已重置所有筛选条件');
+        });
+
+        // 确认筛选
+        confirmBtn.addEventListener('click', () => {
+            filterModal.style.display = 'none';
+            
+            // 统计选中的筛选条件
+            const activeSwitches = [];
+            if (hotSwitch.classList.contains('active')) activeSwitches.push('热门话题');
+            if (newSwitch.classList.contains('active')) activeSwitches.push('最新发布');
+            if (joinedSwitch.classList.contains('active')) activeSwitches.push('已参与话题');
+            
+            if (activeSwitches.length > 0) {
+                showToast(`已应用筛选：${activeSwitches.join('、')}`);
+            } else {
+                showToast('已取消所有筛选条件');
+            }
+        });
+
+        // 3. 发起新话题交互
+        const topicInput = document.getElementById('topicInput');
+        const createBtn = document.getElementById('createBtn');
+
+        createBtn.addEventListener('click', () => {
+            const topicContent = topicInput.value.trim();
+            
+            if (!topicContent) {
+                showToast('请输入话题内容后再发布');
+                topicInput.focus();
+                return;
+            }
+            
+            if (topicContent.length < 10) {
+                showToast('话题内容至少需要10个字符');
+                return;
+            }
+            
+            // 禁用按钮防止重复提交
+            createBtn.disabled = true;
+            createBtn.textContent = '发布中...';
+            
+            setTimeout(() => {
+                showToast('话题发布成功！已进入审核流程');
+                topicInput.value = '';
+                createBtn.disabled = false;
+                createBtn.textContent = '发起新话题';
+            }, 1500);
+        });
+
+        // 4. 分类标签切换交互
+        const categoryTabs = document.querySelectorAll('.category-tab');
+        const categoryGrid = document.getElementById('categoryGrid');
+        
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 切换激活态
+                categoryTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabType = tab.dataset.type;
+                showToast(`已切换为【${tabType === 'scene' ? '按场景' : '按难度'}】分类`);
+                
+                // 模拟分类切换效果
+                const categoryItems = categoryGrid.querySelectorAll('.category-item');
+                categoryItems.forEach((item, index) => {
+                    if (tabType === 'scene') {
+                        // 按场景：显示职场、生活、旅游，隐藏难度分类
+                        item.style.display = index < 3 ? 'block' : 'none';
+                    } else {
+                        // 按难度：显示入门、进阶、精通，隐藏场景分类
+                        item.style.display = index >= 3 ? 'block' : 'none';
+                    }
+                });
+            });
+        });
+
+        // 5. 分类项点击交互
+        const categoryItems = document.querySelectorAll('.category-item');
+        categoryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const category = item.dataset.category;
+                showToast(`进入【${category}】话题分类页面`);
+                
+                // 高亮反馈
+                item.style.backgroundColor = '#d0d8ff';
+                setTimeout(() => {
+                    item.style.backgroundColor = '';
+                }, 500);
+            });
+        });
+
+        // 6. 话题分类“查看全部”交互
+        document.getElementById('categoryMore').addEventListener('click', () => {
+            showToast('加载全部话题分类，共12个分类');
+            
+            // 模拟添加新分类项
+            const newCategories = [
+                {icon: '📚', text: '学习'},
+                {icon: '🎮', text: '娱乐'},
+                {icon: '🍔', text: '美食'}
+            ];
+            
+            newCategories.forEach(cat => {
+                const newItem = document.createElement('div');
+                newItem.className = 'category-item';
+                newItem.dataset.category = cat.text;
+                newItem.innerHTML = `
+                    <div class="category-icon">${cat.icon}</div>
+                    <span class="category-text">${cat.text}</span>
+                `;
+                categoryGrid.appendChild(newItem);
+                
+                // 绑定点击事件
+                newItem.addEventListener('click', () => {
+                    showToast(`进入【${cat.text}】话题分类页面`);
+                });
+            });
+        });
+
+        // 7. 热门话题“完整榜单”交互
+        document.getElementById('hotMore').addEventListener('click', () => {
+            showToast('加载完整热门榜单，共20个话题');
+            
+            const hotList = document.getElementById('hotList');
+            const newTopic = document.createElement('div');
+            newTopic.className = 'hot-item';
+            newTopic.dataset.topic = '如何克服英语口语表达的紧张感？';
+            newTopic.innerHTML = `
+                <div class="hot-rank">4</div>
+                <div class="hot-content">
+                    <div class="hot-title">如何克服英语口语表达的紧张感？</div>
+                    <div class="hot-meta">
+                        <span>讨论量：1280</span>
+                        <span>参与人数：756</span>
+                    </div>
+                </div>
+                <div class="hot-actions">
+                    <button class="join-btn" data-topic="口语紧张感">加入讨论</button>
+                </div>
+            `;
+            hotList.appendChild(newTopic);
+            
+            // 绑定事件
+            bindHotItemEvents(newTopic);
+        });
+
+        // 热门项事件绑定函数
+        function bindHotItemEvents(item) {
+            // 热门项整体点击
+            item.addEventListener('click', () => {
+                const topicTitle = item.dataset.topic;
+                showToast(`查看话题详情：${topicTitle}`);
+            });
+            
+            // 加入讨论按钮
+            const joinBtn = item.querySelector('.join-btn');
+            joinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const topicName = joinBtn.dataset.topic;
+                
+                if (joinBtn.classList.contains('joined')) {
+                    joinBtn.classList.remove('joined');
+                    joinBtn.textContent = '加入讨论';
+                    showToast(`已退出【${topicName}】话题讨论`);
+                } else {
+                    joinBtn.classList.add('joined');
+                    joinBtn.textContent = '已加入';
+                    showToast(`成功加入【${topicName}】话题讨论`);
+                }
+            });
+        }
+
+        // 初始化绑定热门项事件
+        document.querySelectorAll('.hot-item').forEach(item => {
+            bindHotItemEvents(item);
+        });
+
+        // 8. 草稿“管理草稿”交互
+        document.getElementById('draftMore').addEventListener('click', () => {
+            showToast('进入草稿管理页面，可批量编辑/删除');
+            
+            // 模拟添加草稿编辑功能
+            const draftItems = document.querySelectorAll('.draft-item');
+            draftItems.forEach(item => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.style.marginRight = '10px';
+                item.insertBefore(checkbox, item.firstChild);
+            });
+        });
+
+        // 9. 草稿编辑/删除交互
+        const draftItems = document.querySelectorAll('.draft-item');
+        draftItems.forEach(item => {
+            const actionBtns = item.querySelectorAll('.draft-btn');
+            
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    const draftName = btn.dataset.draft;
+                    
+                    if (action === 'edit') {
+                        showToast(`进入【${draftName}】草稿编辑页面`);
+                        
+                        // 按钮状态变化
+                        btn.disabled = true;
+                        btn.textContent = '编辑中...';
+                        
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.textContent = '编辑';
+                            showToast(`【${draftName}】草稿编辑完成`);
+                        }, 1000);
+                    } else if (action === 'delete') {
+                        if (confirm(`确定要删除【${draftName}】草稿吗？删除后不可恢复`)) {
+                            showToast(`已删除【${draftName}】草稿`);
+                            item.style.opacity = '0';
+                            setTimeout(() => {
+                                item.remove();
+                            }, 500);
+                        } else {
+                            showToast('已取消删除操作');
+                        }
+                    }
+                });
+            });
+            
+            // 草稿项整体点击
+            item.addEventListener('click', () => {
+                const draftTitle = item.dataset.draft;
+                showToast(`预览草稿：${draftTitle}`);
+            });
+        });
+
+        // 10. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 首页不重复提示
+                if (navName !== '首页') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持首页激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:first-child').classList.add('active');
+                } else {
+                    showToast('已在首页页面');
+                }
+            });
+        });
+    </script>
+
+            <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>

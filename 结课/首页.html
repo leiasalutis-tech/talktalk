@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 顶部搜索栏 - 强化设计感 */
+        .search-bar {
+            padding: 15px 0;
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+            transform: scale(1.01);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 22px;
+            font-size: 18px;
+            color: #5a4ebb;
+        }
+
+        /* 顶部标签栏（今日场景/自由话题等） */
+        .main-tabs {
+            padding: 10px 0;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background-color: #f0f8ff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin-bottom: 15px;
+        }
+        .main-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .main-tabs a {
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .main-tabs a:hover {
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .main-tabs a.active {
+            color: #5a4ebb;
+            font-weight: bold;
+            border-bottom: 2px solid #5a4ebb;
+        }
+
+        /* 首页轮播图/主图区域 */
+        .banner-section {
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .banner-img {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .banner-img:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .banner-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 今日场景功能区 */
+        .scene-section {
+            margin-bottom: 25px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .section-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .section-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+        .scene-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .scene-item {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+        .scene-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(90, 78, 187, 0.1);
+        }
+        .scene-item:active {
+            transform: scale(0.98);
+        }
+        .scene-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 20px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .scene-item:hover .scene-icon {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .scene-text {
+            font-size: 12px;
+            display: block;
+        }
+
+        /* 今日语伴模块 - 渐变卡片设计 */
+        .companion-section {
+            margin-bottom: 25px;
+        }
+        .companion-card {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            border-radius: 20px;
+            padding: 20px;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(49, 47, 172, 0.2);
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .companion-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(49, 47, 172, 0.25);
+        }
+        .companion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .companion-header h3 {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .companion-header a {
+            font-size: 12px;
+            color: #e0e8ff;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .companion-header a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .companion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .companion-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+        }
+        .companion-item:hover {
+            transform: translateX(5px);
+        }
+        .companion-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .companion-item:hover .companion-avatar {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+        .companion-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .companion-content {
+            flex: 1;
+        }
+        .companion-greeting {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 5px;
+        }
+        .companion-desc {
+            font-size: 12px;
+            color: #e0e8ff;
+        }
+        .companion-btn {
+            background-color: #fff;
+            color: #5a4ebb;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .companion-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background-color: #f0f8ff;
+        }
+        .companion-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 推荐内容模块 */
+        .recommend-section {
+            margin-bottom: 20px;
+        }
+        .recommend-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .recommend-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .recommend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .recommend-item {
+            display: flex;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .recommend-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 5px;
+            border-radius: 10px;
+        }
+        .recommend-item:last-child {
+            border-bottom: none;
+        }
+        .recommend-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background-color: #e0e8ff;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .recommend-item:hover .recommend-img {
+            transform: scale(1.03);
+        }
+        .recommend-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .recommend-content {
+            flex: 1;
+        }
+        .recommend-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .recommend-meta {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部搜索栏 -->
+        <div class="search-bar">
+            <input type="text" placeholder="搜索场景/话题/语伴" id="searchInput">
+        </div>
+
+        <!-- 顶部核心标签栏 -->
+        <div class="main-tabs">
+            <a href="javascript:;" class="active" data-tab="今日场景">今日场景</a>
+            <a href="自由话题.html" data-tab="自由话题">自由话题</a>
+            <a href="热点话题.html" data-tab="热点话题">热点话题</a>
+            <a href="每日听力.html" data-tab="每日听力">每日听力</a>
+            <a href="形象定制.html" data-tab="形象定制">形象定制</a>
+        </div>
+
+        <!-- 首页轮播图 -->
+        <div class="banner-section">
+            <div class="banner-img" id="bannerImg">
+                <!-- 轮播图占位，可替换为实际图片 -->
+                <img src="banner-img.jpg" alt="首页轮播图">
+            </div>
+        </div>
+
+        <!-- 今日场景功能区 -->
+        <div class="scene-section" id="scene">
+            <div class="section-header">
+                <span>今日场景</span>
+                <a href="javascript:;" class="more-link" id="sceneMore">查看全部 ></a>
+            </div>
+            <div class="scene-grid">
+                <!-- 工作任务 -->
+                <a href="javascript:;" class="scene-item" data-scene="工作任务">
+                    <div class="scene-icon">💼</div>
+                    <span class="scene-text">工作任务</span>
+                </a>
+                <!-- 旅行问题 -->
+                <a href="javascript:;" class="scene-item" data-scene="旅行问题">
+                    <div class="scene-icon">✈️</div>
+                    <span class="scene-text">旅行问题</span>
+                </a>
+                <!-- 餐厅点单 -->
+                <a href="javascript:;" class="scene-item" data-scene="餐厅点单">
+                    <div class="scene-icon">🍴</div>
+                    <span class="scene-text">餐厅点单</span>
+                </a>
+                <!-- 文学娱乐 -->
+                <a href="javascript:;" class="scene-item" data-scene="文学娱乐">
+                    <div class="scene-icon">📚</div>
+                    <span class="scene-text">文学娱乐</span>
+                </a>
+            </div>
+        </div>
+
+<div class="companion-section">
+    <div class="companion-card">
+        <div class="companion-header">
+            <h3>今日语伴</h3>
+            <a href="javascript:;" class="more-link" id="companionMore">更多形象 ></a>
+        </div>
+        <div class="companion-list">
+            <!-- 语伴1：商务英语 → 跳转到 business-english.html -->
+            <div class="companion-item">
+                <div class="companion-avatar">👨‍🏫</div>
+                <div class="companion-content">
+                    <div class="companion-greeting">"Hey, that was a great try! You're getting better every day."</div>
+                    <div class="companion-desc">商务英语专属语伴</div>
+                </div>
+                <!-- 替换为a标签，保留样式类，href指定本地文件路径 -->
+                <a href="今日语伴.html" class="companion-btn" data-companion="商务英语">开始学习</a>
+            </div>
+            <!-- 语伴2：日常口语 → 跳转到 daily-english.html -->
+            <div class="companion-item">
+                <div class="companion-avatar">👩‍🏫</div>
+                <div class="companion-content">
+                    <div class="companion-greeting">"I've heard rocks with more rhythm. Put some life into it!"</div>
+                    <div class="companion-desc">日常口语专属语伴</div>
+                </div>
+                <a href="今日语伴.html" class="companion-btn" data-companion="日常口语">开始学习</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- 推荐内容模块（补充页面丰富度） -->
+        <div class="recommend-section">
+            <div class="section-header">
+                <span>为你推荐</span>
+                <a href="javascript:;" class="more-link" id="recommendRefresh">换一批 ></a>
+            </div>
+            <div class="recommend-card">
+                <div class="recommend-list" id="recommendList">
+                    <!-- 推荐1 -->
+                    <div class="recommend-item" data-recommend="100个高频商务英语句型">
+                        <div class="recommend-img">
+                            <img src="recommend1.jpg" alt="推荐内容封面">
+                        </div>
+                        <div class="recommend-content">
+                            <div class="recommend-title">100个高频商务英语句型</div>
+                            <div class="recommend-meta">
+                                <span>难度：中级</span>
+                                <span>学习时长：15min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 推荐2 -->
+                    <div class="recommend-item" data-recommend="旅游英语应急口语80句">
+                        <div class="recommend-img">
+                            <img src="recommend2.jpg" alt="推荐内容封面">
+                        </div>
+                        <div class="recommend-content">
+                            <div class="recommend-title">旅游英语应急口语80句</div>
+                            <div class="recommend-meta">
+                                <span>难度：初级</span>
+                                <span>学习时长：10min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“首页”栏 -->
+    <div class="bottom-nav">
+        <a href="javascript:;" class="nav-item active" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 搜索框交互
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('focus', () => {
+            showToast('输入关键词即可搜索相关内容');
+        });
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.length > 0) {
+                showToast(`正在搜索：${e.target.value}`, 1000);
+            }
+        });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                showToast(`搜索结果：${searchInput.value}（共12条）`);
+                searchInput.blur();
+            }
+        });
+
+        // 2. 顶部标签栏交互
+        const tabLinks = document.querySelectorAll('.main-tabs a');
+        tabLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                // 移除所有激活态
+                tabLinks.forEach(t => t.classList.remove('active'));
+                // 添加当前激活态
+                link.classList.add('active');
+                
+                const tabName = link.dataset.tab;
+                showToast(`已切换到【${tabName}】板块`);
+                
+                // 模拟滚动到对应区域（今日场景）
+                if (tabName === '今日场景') {
+                    document.getElementById('scene').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 3. 轮播图交互
+        const bannerImg = document.getElementById('bannerImg');
+        bannerImg.addEventListener('click', () => {
+            showToast('轮播图点击：立即参与英语打卡活动');
+            // 模拟轮播图点击后的轻微缩放动画
+            bannerImg.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                bannerImg.style.transform = 'none';
+            }, 200);
+        });
+
+        // 4. 场景item交互
+        const sceneItems = document.querySelectorAll('.scene-item');
+        sceneItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const sceneName = item.dataset.scene;
+                showToast(`选择场景：${sceneName}，正在加载内容...`);
+                
+                // 模拟点击后的高亮动画
+                item.style.backgroundColor = '#e0e8ff';
+                setTimeout(() => {
+                    item.style.backgroundColor = '#fff';
+                }, 300);
+            });
+        });
+
+        // 5. 今日场景“查看全部”交互
+        document.getElementById('sceneMore').addEventListener('click', () => {
+            showToast('已加载全部场景分类，共18个');
+        });
+
+        // 6. 今日语伴“更多形象”交互
+        document.getElementById('companionMore').addEventListener('click', () => {
+            showToast('语伴形象库已更新，新增5个专属语伴');
+        });
+
+        // 7. 语伴“开始学习”按钮交互
+        const companionBtns = document.querySelectorAll('.companion-btn');
+        companionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const companionType = btn.dataset.companion;
+                showToast(`开始【${companionType}】学习，加油！`);
+                
+                // 按钮点击变色效果
+                btn.style.backgroundColor = '#5a4ebb';
+                btn.style.color = '#fff';
+                btn.textContent = '学习中...';
+                
+                setTimeout(() => {
+                    btn.style.backgroundColor = '#fff';
+                    btn.style.color = '#5a4ebb';
+                    btn.textContent = '开始学习';
+                }, 1500);
+            });
+        });
+
+        // 8. 推荐内容“换一批”交互
+        const recommendRefresh = document.getElementById('recommendRefresh');
+        const recommendList = document.getElementById('recommendList');
+        
+        // 推荐内容备选列表
+        const recommendContents = [
+            {
+                title: '100个高频商务英语句型',
+                meta: ['难度：中级', '学习时长：15min'],
+                icon: '💼'
+            },
+            {
+                title: '旅游英语应急口语80句',
+                meta: ['难度：初级', '学习时长：10min'],
+                icon: '✈️'
+            },
+            {
+                title: '日常交流实用俚语50个',
+                meta: ['难度：初级', '学习时长：8min'],
+                icon: '🗣️'
+            },
+            {
+                title: '雅思口语高分模板20套',
+                meta: ['难度：高级', '学习时长：20min'],
+                icon: '📝'
+            },
+            {
+                title: '职场邮件写作技巧',
+                meta: ['难度：中级', '学习时长：12min'],
+                icon: '✉️'
+            }
+        ];
+
+        recommendRefresh.addEventListener('click', () => {
+            showToast('正在为你刷新推荐内容...');
+            
+            // 禁用按钮防止重复点击
+            recommendRefresh.style.pointerEvents = 'none';
+            recommendRefresh.style.opacity = '0.7';
+            
+            // 模拟加载动画
+            setTimeout(() => {
+                // 随机选择2个不同的推荐内容
+                let randomIndexes = [];
+                while (randomIndexes.length < 2) {
+                    const randomIdx = Math.floor(Math.random() * recommendContents.length);
+                    if (!randomIndexes.includes(randomIdx)) {
+                        randomIndexes.push(randomIdx);
+                    }
+                }
+                
+                // 更新推荐列表
+                let newHtml = '';
+                randomIndexes.forEach(idx => {
+                    const content = recommendContents[idx];
+                    newHtml += `
+                        <div class="recommend-item" data-recommend="${content.title}">
+                            <div class="recommend-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#5a4ebb">
+                                ${content.icon}
+                            </div>
+                            <div class="recommend-content">
+                                <div class="recommend-title">${content.title}</div>
+                                <div class="recommend-meta">
+                                    <span>${content.meta[0]}</span>
+                                    <span>${content.meta[1]}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                recommendList.innerHTML = newHtml;
+                
+                // 重新绑定推荐item的点击事件
+                bindRecommendItemClick();
+                
+                showToast('推荐内容已更新！');
+                
+                // 恢复按钮状态
+                recommendRefresh.style.pointerEvents = 'auto';
+                recommendRefresh.style.opacity = '1';
+            }, 1000);
+        });
+
+        // 9. 推荐item交互
+        function bindRecommendItemClick() {
+            const recommendItems = document.querySelectorAll('.recommend-item');
+            recommendItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const recommendTitle = item.dataset.recommend;
+                    showToast(`选择学习：${recommendTitle}`);
+                });
+            });
+        }
+        // 初始化绑定
+        bindRecommendItemClick();
+
+        // 10. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 首页不重复提示
+                if (navName !== '首页') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持首页激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:first-child').classList.add('active');
+                } else {
+                    showToast('已在首页');
+                }
+            });
+        });
+    </script>
+        <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>

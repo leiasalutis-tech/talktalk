@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 个人信息卡片 - 顶部核心模块 */
+        .profile-card {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            border-radius: 20px;
+            padding: 25px 20px;
+            margin: 20px 0 25px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(49, 47, 172, 0.2);
+            transition: all 0.3s;
+        }
+        .profile-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(49, 47, 172, 0.25);
+        }
+        .avatar-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .avatar-box:hover {
+            transform: scale(1.05);
+            border-color: #fff;
+        }
+        .avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-placeholder {
+            font-size: 30px;
+            color: #fff;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .profile-stats {
+            font-size: 14px;
+            color: #e0e8ff;
+            margin-bottom: 12px;
+        }
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .profile-btn {
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .profile-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .profile-btn:active {
+            transform: scale(0.98);
+        }
+        .edit-btn {
+            background-color: #fff;
+            color: #5a4ebb;
+        }
+        .edit-btn:hover {
+            background-color: #f0f8ff;
+        }
+        .report-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 1px solid #fff;
+        }
+        .report-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        /* 学习数据模块 */
+        .stats-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .card-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .card-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .stats-item {
+            text-align: center;
+            padding: 15px 10px;
+            background-color: #f8f9ff;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .stats-item:hover {
+            transform: translateY(-3px);
+            background-color: #e0e8ff;
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.1);
+        }
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 20px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .stats-item:hover .stats-icon {
+            transform: scale(1.1);
+            background-color: #d0d8ff;
+        }
+        .stats-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .stats-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 设置区模块 */
+        .settings-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: all 0.3s;
+        }
+        .settings-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 10px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .settings-item:first-child {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .settings-item:last-child {
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .settings-item:hover {
+            background-color: #f8f9ff;
+            padding-left: 15px;
+        }
+        .settings-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #333;
+        }
+        .settings-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #5a4ebb;
+            transition: all 0.2s;
+        }
+        .settings-item:hover .settings-icon {
+            transform: scale(1.1);
+            background-color: #d0d8ff;
+        }
+        .settings-text {
+            font-size: 14px;
+        }
+        .settings-right {
+            color: #999;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .settings-item:hover .settings-right {
+            color: #5a4ebb;
+            transform: translateX(3px);
+        }
+        .arrow-icon {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        /* 反馈按钮 */
+        .feedback-btn {
+            width: 100%;
+            background-color: #5a4ebb;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(90, 78, 187, 0.2);
+            transition: all 0.3s;
+        }
+        .feedback-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(90, 78, 187, 0.3);
+            background-color: #312fac;
+        }
+        .feedback-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+            transform: translateY(-2px);
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 反馈弹窗（模拟） */
+        .feedback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            width: 85%;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 25px 20px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .feedback-input {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
+            resize: none;
+            margin-bottom: 20px;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 10px 0;
+            border-radius: 15px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .cancel-btn {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        .submit-btn {
+            background-color: #5a4ebb;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 个人信息卡片 -->
+        <div class="profile-card">
+            <div class="avatar-box" id="avatarBox">
+                <!-- 头像占位，可替换为实际图片 -->
+                <div class="avatar-placeholder">👤</div>
+                <!-- <img src="avatar.jpg" alt="个人头像"> -->
+            </div>
+            <div class="profile-info">
+                <div class="profile-name">英语学习达人</div>
+                <div class="profile-stats">累计学习时长：328小时</div>
+                <div class="profile-actions">
+                    <button class="profile-btn edit-btn" id="editBtn">编辑资料</button>
+                    <button class="profile-btn report-btn" id="reportBtn">学习报告</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学习数据模块 -->
+        <div class="stats-card">
+            <div class="card-header">
+                <h3>学习数据</h3>
+                <a href="javascript:;" class="more-link" id="statsMore">查看详情 ></a>
+            </div>
+            <div class="stats-grid">
+                <!-- 累计单词量 -->
+                <div class="stats-item" data-stats="累计单词量">
+                    <div class="stats-icon">📖</div>
+                    <div class="stats-value">5280</div>
+                    <div class="stats-label">累计单词量</div>
+                </div>
+                <!-- 听力时长 -->
+                <div class="stats-item" data-stats="听力时长">
+                    <div class="stats-icon">🎧</div>
+                    <div class="stats-value">186h</div>
+                    <div class="stats-label">听力时长</div>
+                </div>
+                <!-- 测试分数 -->
+                <div class="stats-item" data-stats="平均测试分">
+                    <div class="stats-icon">📝</div>
+                    <div class="stats-value">92</div>
+                    <div class="stats-label">平均测试分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置区模块 -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3>系统设置</h3>
+            </div>
+            <div class="settings-list">
+                <!-- 账号设置 -->
+                <div class="settings-item" data-setting="账号与安全">
+                    <div class="settings-left">
+                        <div class="settings-icon">🔑</div>
+                        <div class="settings-text">账号与安全</div>
+                    </div>
+                    <div class="settings-right">
+                        <span>></span>
+                    </div>
+                </div>
+                <!-- 通知设置 -->
+                <div class="settings-item" data-setting="通知设置">
+                    <div class="settings-left">
+                        <div class="settings-icon">🔔</div>
+                        <div class="settings-text">通知设置</div>
+                    </div>
+                    <div class="settings-right">
+                        <span>></span>
+                    </div>
+                </div>
+                <!-- 隐私设置 -->
+                <div class="settings-item" data-setting="隐私设置">
+                    <div class="settings-left">
+                        <div class="settings-icon">🛡️</div>
+                        <div class="settings-text">隐私设置</div>
+                    </div>
+                    <div class="settings-right">
+                        <span>></span>
+                    </div>
+                </div>
+                <!-- 通用设置 -->
+                <div class="settings-item" data-setting="通用设置">
+                    <div class="settings-left">
+                        <div class="settings-icon">⚙️</div>
+                        <div class="settings-text">通用设置</div>
+                    </div>
+                    <div class="settings-right">
+                        <span>></span>
+                    </div>
+                </div>
+                <!-- 帮助中心 -->
+                <div class="settings-item" data-setting="帮助中心">
+                    <div class="settings-left">
+                        <div class="settings-icon">❓</div>
+                        <div class="settings-text">帮助中心</div>
+                    </div>
+                    <div class="settings-right">
+                        <span>></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 意见反馈按钮 -->
+            <button class="feedback-btn" id="feedbackBtn">意见反馈</button>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“我的”栏 -->
+    <div class="bottom-nav">
+        <a href="javascript:;" class="nav-item" data-nav="首页">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="专项">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="javascript:;" class="nav-item" data-nav="资料库">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="javascript:;" class="nav-item active" data-nav="我的">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 反馈弹窗 -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-title">意见反馈</div>
+            <textarea class="feedback-input" placeholder="请输入您的意见或建议..."></textarea>
+            <div class="modal-btns">
+                <button class="modal-btn cancel-btn" id="cancelBtn">取消</button>
+                <button class="modal-btn submit-btn" id="submitBtn">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 头像点击交互
+        document.getElementById('avatarBox').addEventListener('click', () => {
+            showToast('点击更换头像，支持jpg/png格式');
+            
+            // 模拟选择图片的交互反馈
+            setTimeout(() => {
+                showToast('头像更换成功！');
+                document.querySelector('.avatar-placeholder').textContent = '🧑';
+            }, 1500);
+        });
+
+        // 2. 编辑资料按钮交互
+        document.getElementById('editBtn').addEventListener('click', () => {
+            showToast('进入个人资料编辑页面');
+            
+            // 按钮状态变化
+            const btn = document.getElementById('editBtn');
+            btn.disabled = true;
+            btn.textContent = '加载中...';
+            
+            setTimeout(() => {
+                showToast('资料编辑页面已打开');
+                btn.disabled = false;
+                btn.textContent = '编辑资料';
+            }, 1000);
+        });
+
+        // 3. 学习报告按钮交互
+        document.getElementById('reportBtn').addEventListener('click', () => {
+            showToast('正在生成您的学习报告...');
+            
+            // 按钮状态变化
+            const btn = document.getElementById('reportBtn');
+            btn.disabled = true;
+            btn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            
+            setTimeout(() => {
+                showToast('学习报告生成完成，共12页');
+                btn.disabled = false;
+                btn.style.backgroundColor = '';
+            }, 2000);
+        });
+
+        // 4. 学习数据查看详情交互
+        document.getElementById('statsMore').addEventListener('click', () => {
+            showToast('查看学习数据详细报表');
+            
+            // 模拟数据更新效果
+            const statsValues = document.querySelectorAll('.stats-value');
+            statsValues.forEach((value, index) => {
+                const original = value.textContent;
+                // 数字滚动效果（简单模拟）
+                let i = 0;
+                const timer = setInterval(() => {
+                    if (index === 0) {
+                        value.textContent = (5280 + i).toString();
+                    } else if (index === 1) {
+                        value.textContent = `${186 + i}h`;
+                    } else {
+                        value.textContent = (92 + i).toString();
+                    }
+                    i++;
+                    if (i > 5) clearInterval(timer);
+                }, 100);
+            });
+        });
+
+        // 5. 学习数据项点击交互
+        const statsItems = document.querySelectorAll('.stats-item');
+        statsItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const statsType = item.dataset.stats;
+                const statsValue = item.querySelector('.stats-value').textContent;
+                showToast(`${statsType}详情：${statsValue}`);
+                
+                // 高亮反馈
+                item.style.backgroundColor = '#d0d8ff';
+                setTimeout(() => {
+                    item.style.backgroundColor = '';
+                }, 500);
+            });
+        });
+
+        // 6. 设置项点击交互
+        const settingsItems = document.querySelectorAll('.settings-item');
+        settingsItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const settingType = item.dataset.setting;
+                showToast(`进入【${settingType}】设置页面`);
+                
+                // 箭头动画
+                const arrow = item.querySelector('.settings-right span');
+                arrow.style.transform = 'rotate(90deg)';
+                setTimeout(() => {
+                    arrow.style.transform = '';
+                }, 300);
+            });
+        });
+
+        // 7. 意见反馈按钮交互
+        const feedbackBtn = document.getElementById('feedbackBtn');
+        const feedbackModal = document.getElementById('feedbackModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        feedbackBtn.addEventListener('click', () => {
+            showToast('打开意见反馈表单');
+            feedbackModal.style.display = 'flex';
+        });
+
+        // 取消反馈
+        cancelBtn.addEventListener('click', () => {
+            feedbackModal.style.display = 'none';
+            showToast('已取消意见反馈');
+        });
+
+        // 提交反馈
+        submitBtn.addEventListener('click', () => {
+            const feedbackInput = document.querySelector('.feedback-input');
+            if (!feedbackInput.value.trim()) {
+                showToast('请输入您的意见或建议');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+            
+            setTimeout(() => {
+                feedbackModal.style.display = 'none';
+                showToast('感谢您的反馈，我们会尽快处理');
+                feedbackInput.value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交';
+            }, 1500);
+        });
+
+        // 8. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const navName = item.dataset.nav;
+                
+                // 我的页面不重复提示
+                if (navName !== '我的') {
+                    showToast(`即将进入【${navName}】页面`);
+                    
+                    // 模拟选中效果（保持我的激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:last-child').classList.add('active');
+                } else {
+                    showToast('已在个人中心页面');
+                }
+            });
+        });
+    </script>
+    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>

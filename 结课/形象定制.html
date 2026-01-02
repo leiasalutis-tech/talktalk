@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>形象定制</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            font-family: "微软雅黑", sans-serif;
+            background-color: #f0f8ff;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            padding: 0 20px;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            padding: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 顶部搜索栏 */
+        .search-bar {
+            padding: 10px 0;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #fff;
+            font-size: 14px;
+            padding-left: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(90, 78, 187, 0.2);
+        }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 20px;
+            top: 18px;
+            font-size: 18px;
+            color: #5a4ebb;
+        }
+
+        /* 虚拟形象预览区 */
+        .avatar-preview-section {
+            margin-bottom: 25px;
+        }
+        .preview-card {
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .preview-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .preview-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #312fac, #676cb8);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .preview-avatar.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(49, 47, 172, 0.3);
+        }
+        .preview-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-placeholder {
+            font-size: 48px;
+            color: #fff;
+        }
+        .preview-name {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .preview-desc {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .preview-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        .preview-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .preview-btn:active {
+            transform: scale(0.98);
+        }
+        .save-btn {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .save-btn.success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+        .reset-btn {
+            background-color: #ffe8e8;
+            color: #ff6b6b;
+        }
+        .interact-btn {
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+        }
+
+        /* 虚拟形象选择区 */
+        .avatar-select-section {
+            margin-bottom: 25px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        .section-header .more-link {
+            font-size: 12px;
+            color: #5a4ebb;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .section-header .more-link:hover {
+            color: #312fac;
+            text-decoration: underline;
+        }
+        .avatar-list {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+        }
+        .avatar-list::-webkit-scrollbar {
+            display: none;
+        }
+        .avatar-item {
+            flex: 0 0 auto;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .avatar-item:hover {
+            transform: scale(1.05);
+        }
+        .avatar-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #e0e8ff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .avatar-icon.selected {
+            border-color: #5a4ebb;
+            box-shadow: 0 0 10px rgba(90, 78, 187, 0.2);
+        }
+        .avatar-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .avatar-text {
+            font-size: 12px;
+            color: #333;
+        }
+
+        /* 形象装扮区 */
+        .dress-up-section {
+            margin-bottom: 25px;
+        }
+        .dress-up-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .dress-up-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .dress-up-tab {
+            padding: 8px 18px;
+            background-color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            border: none;
+            transition: all 0.2s;
+        }
+        .dress-up-tab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dress-up-tab.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .dress-up-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        /* 不同装扮分类的内容（默认只显示发型） */
+        .dress-up-content {
+            display: none;
+        }
+        .dress-up-content.active {
+            display: grid;
+        }
+        .dress-up-item {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .dress-up-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dress-up-item.selected {
+            border-color: #5a4ebb;
+            box-shadow: 0 0 10px rgba(90, 78, 187, 0.2);
+        }
+        .dress-up-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #e0e8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            font-size: 20px;
+            color: #5a4ebb;
+            overflow: hidden;
+        }
+        .dress-up-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .dress-up-text {
+            font-size: 12px;
+            color: #333;
+            display: block;
+        }
+
+        /* 形象语音设置 */
+        .voice-setting-section {
+            margin-bottom: 20px;
+        }
+        .voice-card {
+            background-color: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .voice-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .voice-style-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .voice-style-btn {
+            padding: 8px 15px;
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+            border-radius: 15px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .voice-style-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.1);
+        }
+        .voice-style-btn.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+        .voice-preview {
+            border: 1px solid #e0e8ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+        .voice-preview.active {
+            border-color: #5a4ebb;
+            background-color: #f8f9ff;
+        }
+        .voice-preview-title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        .voice-preview-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+        .play-voice-btn {
+            width: 100%;
+            padding: 10px 0;
+            background-color: #e0e8ff;
+            color: #5a4ebb;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .play-voice-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(90, 78, 187, 0.1);
+        }
+        .play-voice-btn.active {
+            background: linear-gradient(to right, #312fac, #676cb8);
+            color: #fff;
+        }
+
+        /* 底部导航 - 保持样式一致 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5%;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            z-index: 99;
+            box-sizing: border-box;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            width: 20%;
+            padding: 8px 0;
+            border-radius: 12px;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item:hover {
+            background-color: #f5f7ff;
+            color: #5a4ebb;
+        }
+        .nav-item .icon-box {
+            width: 24px;
+            height: 24px;
+            background-color: #eee;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .bottom-nav .nav-item.active {
+            color: #fff;
+            background-color: #5a4ebb;
+            font-weight: bold;
+        }
+        .nav-item.active .icon-box {
+            background-color: #fff;
+        }
+
+        /* 提示框样式 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面标题 -->
+        <div class="page-title">形象定制</div>
+
+        <!-- 顶部搜索栏 -->
+        <div class="search-bar">
+            <input type="text" placeholder="搜索形象风格/装扮配件">
+        </div>
+
+        <!-- 虚拟形象预览区 -->
+        <div class="avatar-preview-section">
+            <div class="preview-card">
+                <div class="preview-avatar" id="previewAvatar">
+                    <!-- 形象预览占位，可替换为图片 -->
+                    <div class="preview-placeholder">👤</div>
+                    <!-- <img src="preview-avatar.jpg" alt="当前定制形象"> -->
+                </div>
+                <div class="preview-name">我的专属语伴</div>
+                <div class="preview-desc" id="previewDesc">风格：商务男士 | 语音：活泼轻松</div>
+                <div class="preview-actions">
+                    <button class="preview-btn save-btn" id="saveBtn">保存形象</button>
+                    <button class="preview-btn reset-btn" id="resetBtn">重置形象</button>
+                    <button class="preview-btn interact-btn" id="interactBtn">预览互动</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 虚拟形象选择区 -->
+        <div class="avatar-select-section">
+            <div class="section-header">
+                <span>选择基础形象</span>
+                <a href="javascript:;" class="more-link">更多形象 ></a>
+            </div>
+            <div class="avatar-list">
+                <!-- 形象1（选中） -->
+                <div class="avatar-item" data-type="商务男士" data-icon="👨‍💼">
+                    <div class="avatar-icon selected" id="avatar1">
+                        👨‍💼
+                    </div>
+                    <div class="avatar-text">商务男士</div>
+                </div>
+                <!-- 形象2 -->
+                <div class="avatar-item" data-type="职场女士" data-icon="👩‍💼">
+                    <div class="avatar-icon" id="avatar2">
+                        👩‍💼
+                    </div>
+                    <div class="avatar-text">职场女士</div>
+                </div>
+                <!-- 形象3 -->
+                <div class="avatar-item" data-type="活力青年" data-icon="👦">
+                    <div class="avatar-icon" id="avatar3">
+                        👦
+                    </div>
+                    <div class="avatar-text">活力青年</div>
+                </div>
+                <!-- 形象4 -->
+                <div class="avatar-item" data-type="亲切学姐" data-icon="👧">
+                    <div class="avatar-icon" id="avatar4">
+                        👧
+                    </div>
+                    <div class="avatar-text">亲切学姐</div>
+                </div>
+                <!-- 形象5 -->
+                <div class="avatar-item" data-type="外教风格" data-icon="👨‍🏫">
+                    <div class="avatar-icon" id="avatar5">
+                        👨‍🏫
+                    </div>
+                    <div class="avatar-text">外教风格</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 形象装扮区 -->
+        <div class="dress-up-section">
+            <div class="section-header">
+                <span>形象装扮</span>
+                <a href="javascript:;" class="more-link">更多装扮 ></a>
+            </div>
+            <!-- 装扮分类标签 -->
+            <div class="dress-up-tabs">
+                <button class="dress-up-tab active" data-tab="hair">发型</button>
+                <button class="dress-up-tab" data-tab="clothes">服饰</button>
+                <button class="dress-up-tab" data-tab="accessory">配饰</button>
+                <button class="dress-up-tab" data-tab="background">背景</button>
+            </div>
+            
+            <!-- 发型装扮内容 -->
+            <div class="dress-up-grid dress-up-content active" id="hairContent">
+                <!-- 发型1（选中） -->
+                <div class="dress-up-item selected" data-dress="商务短发" data-type="hair">
+                    <div class="dress-up-icon">
+                        💇‍♂️
+                    </div>
+                    <span class="dress-up-text">商务短发</span>
+                </div>
+                <!-- 发型2 -->
+                <div class="dress-up-item" data-dress="休闲长发" data-type="hair">
+                    <div class="dress-up-icon">
+                        💇‍♂️
+                    </div>
+                    <span class="dress-up-text">休闲长发</span>
+                </div>
+                <!-- 发型3 -->
+                <div class="dress-up-item" data-dress="时尚卷发" data-type="hair">
+                    <div class="dress-up-icon">
+                        💇‍♂️
+                    </div>
+                    <span class="dress-up-text">时尚卷发</span>
+                </div>
+                <!-- 发型4 -->
+                <div class="dress-up-item" data-dress="干练寸头" data-type="hair">
+                    <div class="dress-up-icon">
+                        💇‍♂️
+                    </div>
+                    <span class="dress-up-text">干练寸头</span>
+                </div>
+            </div>
+
+            <!-- 服饰装扮内容（默认隐藏） -->
+            <div class="dress-up-grid dress-up-content" id="clothesContent">
+                <div class="dress-up-item selected" data-dress="商务西装" data-type="clothes">
+                    <div class="dress-up-icon">
+                        👔
+                    </div>
+                    <span class="dress-up-text">商务西装</span>
+                </div>
+                <div class="dress-up-item" data-dress="休闲衬衫" data-type="clothes">
+                    <div class="dress-up-icon">
+                        👕
+                    </div>
+                    <span class="dress-up-text">休闲衬衫</span>
+                </div>
+                <div class="dress-up-item" data-dress="运动卫衣" data-type="clothes">
+                    <div class="dress-up-icon">
+                        🧥
+                    </div>
+                    <span class="dress-up-text">运动卫衣</span>
+                </div>
+                <div class="dress-up-item" data-dress="职业套裙" data-type="clothes">
+                    <div class="dress-up-icon">
+                        👗
+                    </div>
+                    <span class="dress-up-text">职业套裙</span>
+                </div>
+            </div>
+
+            <!-- 配饰装扮内容（默认隐藏） -->
+            <div class="dress-up-grid dress-up-content" id="accessoryContent">
+                <div class="dress-up-item selected" data-dress="无配饰" data-type="accessory">
+                    <div class="dress-up-icon">
+                        📿
+                    </div>
+                    <span class="dress-up-text">无配饰</span>
+                </div>
+                <div class="dress-up-item" data-dress="商务手表" data-type="accessory">
+                    <div class="dress-up-icon">
+                        ⌚
+                    </div>
+                    <span class="dress-up-text">商务手表</span>
+                </div>
+                <div class="dress-up-item" data-dress="简约项链" data-type="accessory">
+                    <div class="dress-up-icon">
+                        🔗
+                    </div>
+                    <span class="dress-up-text">简约项链</span>
+                </div>
+                <div class="dress-up-item" data-dress="时尚眼镜" data-type="accessory">
+                    <div class="dress-up-icon">
+                        👓
+                    </div>
+                    <span class="dress-up-text">时尚眼镜</span>
+                </div>
+            </div>
+
+            <!-- 背景装扮内容（默认隐藏） -->
+            <div class="dress-up-grid dress-up-content" id="backgroundContent">
+                <div class="dress-up-item selected" data-dress="办公场景" data-type="background">
+                    <div class="dress-up-icon">
+                        🏢
+                    </div>
+                    <span class="dress-up-text">办公场景</span>
+                </div>
+                <div class="dress-up-item" data-dress="咖啡小店" data-type="background">
+                    <div class="dress-up-icon">
+                        ☕
+                    </div>
+                    <span class="dress-up-text">咖啡小店</span>
+                </div>
+                <div class="dress-up-item" data-dress="户外公园" data-type="background">
+                    <div class="dress-up-icon">
+                        🌳
+                    </div>
+                    <span class="dress-up-text">户外公园</span>
+                </div>
+                <div class="dress-up-item" data-dress="简约纯色" data-type="background">
+                    <div class="dress-up-icon">
+                        🎨
+                    </div>
+                    <span class="dress-up-text">简约纯色</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 形象语音设置 -->
+        <div class="voice-setting-section">
+            <div class="section-header">
+                <span>语音设置</span>
+                <a href="javascript:;" class="more-link">高级设置 ></a>
+            </div>
+            <div class="voice-card">
+                <!-- 语音风格选择 -->
+                <div class="voice-style-list">
+                    <button class="voice-style-btn" data-voice="正式商务">正式商务</button>
+                    <button class="voice-style-btn active" data-voice="活泼轻松">活泼轻松</button>
+                    <button class="voice-style-btn" data-voice="温柔亲切">温柔亲切</button>
+                    <button class="voice-style-btn" data-voice="沉稳专业">沉稳专业</button>
+                    <button class="voice-style-btn" data-voice="甜美可爱">甜美可爱</button>
+                    <button class="voice-style-btn" data-voice="纯正英音">纯正英音</button>
+                </div>
+                <!-- 语音预览 -->
+                <div class="voice-preview" id="voicePreview">
+                    <div class="voice-preview-title">预览例句：</div>
+                    <div class="voice-preview-text">Welcome to your personalized English learning journey! Let's start practicing together.</div>
+                </div>
+                <button class="play-voice-btn" id="playVoiceBtn">
+                    <span>▶️</span>
+                    <span>播放语音预览</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 - 激活“首页”栏 -->
+    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="javascript:;" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="javascript:;" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="javascript:;" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 提示框函数
+        function showToast(text, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 1. 基础形象选择交互
+        const avatarItems = document.querySelectorAll('.avatar-item');
+        const previewAvatar = document.getElementById('previewAvatar');
+        const previewDesc = document.getElementById('previewDesc');
+        let currentAvatar = {
+            type: '商务男士',
+            icon: '👨‍💼'
+        };
+
+        avatarItems.forEach(item => {
+            const icon = item.querySelector('.avatar-icon');
+            
+            item.addEventListener('click', () => {
+                // 移除所有选中状态
+                document.querySelectorAll('.avatar-icon').forEach(av => {
+                    av.classList.remove('selected');
+                });
+                // 添加当前选中状态
+                icon.classList.add('selected');
+                
+                // 更新预览形象
+                currentAvatar.type = item.dataset.type;
+                currentAvatar.icon = item.dataset.icon;
+                previewAvatar.innerHTML = `<div class="preview-placeholder">${currentAvatar.icon}</div>`;
+                previewAvatar.classList.add('active');
+                
+                // 300ms后取消放大效果
+                setTimeout(() => {
+                    previewAvatar.classList.remove('active');
+                }, 300);
+                
+                // 更新描述
+                updatePreviewDesc();
+                
+                showToast(`已选择：${currentAvatar.type}`);
+            });
+        });
+
+        // 2. 装扮分类标签切换
+        const dressTabs = document.querySelectorAll('.dress-up-tab');
+        const dressContents = document.querySelectorAll('.dress-up-content');
+        
+        dressTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有标签激活态
+                dressTabs.forEach(t => t.classList.remove('active'));
+                // 添加当前标签激活态
+                tab.classList.add('active');
+                
+                const tabName = tab.dataset.tab;
+                
+                // 隐藏所有内容
+                dressContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 显示对应内容
+                document.getElementById(`${tabName}Content`).classList.add('active');
+                
+                showToast(`切换到${tab.textContent}装扮`);
+            });
+        });
+
+        // 3. 装扮选项选择交互
+        const dressItems = document.querySelectorAll('.dress-up-item');
+        let currentDress = {
+            hair: '商务短发',
+            clothes: '商务西装',
+            accessory: '无配饰',
+            background: '办公场景'
+        };
+
+        dressItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const dressType = item.dataset.type;
+                
+                // 移除同类型所有选中状态
+                document.querySelectorAll(`.dress-up-item[data-type="${dressType}"]`).forEach(d => {
+                    d.classList.remove('selected');
+                });
+                
+                // 添加当前选中状态
+                item.classList.add('selected');
+                
+                // 更新当前装扮
+                currentDress[dressType] = item.dataset.dress;
+                
+                // 更新预览描述
+                updatePreviewDesc();
+                
+                showToast(`已选择${dressType}：${item.dataset.dress}`);
+            });
+        });
+
+        // 3. 语音风格选择交互
+        const voiceBtns = document.querySelectorAll('.voice-style-btn');
+        const voicePreview = document.getElementById('voicePreview');
+        let currentVoice = '活泼轻松';
+
+        voiceBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有激活态
+                voiceBtns.forEach(b => b.classList.remove('active'));
+                // 添加当前激活态
+                btn.classList.add('active');
+                
+                currentVoice = btn.dataset.voice;
+                voicePreview.classList.add('active');
+                
+                // 500ms后取消高亮
+                setTimeout(() => {
+                    voicePreview.classList.remove('active');
+                }, 500);
+                
+                // 更新描述
+                updatePreviewDesc();
+                
+                showToast(`语音风格：${currentVoice}`);
+            });
+        });
+
+        // 4. 播放语音预览交互
+        const playVoiceBtn = document.getElementById('playVoiceBtn');
+        let isPlaying = false;
+
+        playVoiceBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                // 播放状态
+                playVoiceBtn.classList.add('active');
+                playVoiceBtn.innerHTML = `<span>⏸️</span><span>暂停语音预览</span>`;
+                isPlaying = true;
+                
+                voicePreview.classList.add('active');
+                showToast('正在播放语音预览...');
+                
+                // 模拟播放5秒后自动暂停
+                setTimeout(() => {
+                    playVoiceBtn.classList.remove('active');
+                    playVoiceBtn.innerHTML = `<span>▶️</span><span>播放语音预览</span>`;
+                    voicePreview.classList.remove('active');
+                    isPlaying = false;
+                    showToast('语音预览播放完毕');
+                }, 5000);
+            } else {
+                // 暂停状态
+                playVoiceBtn.classList.remove('active');
+                playVoiceBtn.innerHTML = `<span>▶️</span><span>播放语音预览</span>`;
+                voicePreview.classList.remove('active');
+                isPlaying = false;
+                showToast('已暂停语音预览');
+            }
+        });
+
+        // 5. 保存形象按钮交互
+        const saveBtn = document.getElementById('saveBtn');
+        
+        saveBtn.addEventListener('click', () => {
+            saveBtn.classList.add('success');
+            showToast('形象保存成功！');
+            
+            // 2秒后恢复按钮样式
+            setTimeout(() => {
+                saveBtn.classList.remove('success');
+            }, 2000);
+        });
+
+        // 6. 重置形象按钮交互
+        const resetBtn = document.getElementById('resetBtn');
+        
+        resetBtn.addEventListener('click', () => {
+            // 重置基础形象
+            document.querySelectorAll('.avatar-icon').forEach(av => av.classList.remove('selected'));
+            document.getElementById('avatar1').classList.add('selected');
+            currentAvatar = {
+                type: '商务男士',
+                icon: '👨‍💼'
+            };
+            previewAvatar.innerHTML = `<div class="preview-placeholder">👨‍💼</div>`;
+            
+            // 重置装扮
+            dressItems.forEach(item => item.classList.remove('selected'));
+            document.querySelectorAll('.dress-up-item[data-dress="商务短发"]')[0].classList.add('selected');
+            document.querySelectorAll('.dress-up-item[data-dress="商务西装"]')[0].classList.add('selected');
+            document.querySelectorAll('.dress-up-item[data-dress="无配饰"]')[0].classList.add('selected');
+            document.querySelectorAll('.dress-up-item[data-dress="办公场景"]')[0].classList.add('selected');
+            
+            currentDress = {
+                hair: '商务短发',
+                clothes: '商务西装',
+                accessory: '无配饰',
+                background: '办公场景'
+            };
+            
+            // 重置语音
+            voiceBtns.forEach(b => b.classList.remove('active'));
+            document.querySelector('.voice-style-btn[data-voice="活泼轻松"]').classList.add('active');
+            currentVoice = '活泼轻松';
+            
+            // 更新描述
+            updatePreviewDesc();
+            
+            showToast('形象已重置为默认样式');
+        });
+
+        // 7. 预览互动按钮交互
+        const interactBtn = document.getElementById('interactBtn');
+        
+        interactBtn.addEventListener('click', () => {
+            previewAvatar.classList.add('active');
+            showToast('形象正在演示互动...');
+            
+            // 模拟互动动画
+            let count = 0;
+            const animateInterval = setInterval(() => {
+                previewAvatar.style.transform = count % 2 === 0 ? 'rotate(5deg)' : 'rotate(-5deg)';
+                count++;
+                
+                if (count >= 6) {
+                    clearInterval(animateInterval);
+                    previewAvatar.style.transform = 'none';
+                    previewAvatar.classList.remove('active');
+                    showToast('互动演示完毕：Hello! Let\'s practice English together!');
+                }
+            }, 100);
+        });
+
+        // 更新预览描述函数
+        function updatePreviewDesc() {
+            previewDesc.textContent = `风格：${currentAvatar.type} | 装扮：${currentDress.hair} | 语音：${currentVoice}`;
+        }
+
+        // 8. 底部导航交互
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // 首页不做提示（跳转），其他做提示
+                if (!item.classList.contains('active')) {
+                    e.preventDefault();
+                    showToast(`即将进入：${item.querySelector('span').textContent}`);
+                    
+                    // 模拟选中效果（首页保持激活）
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.bottom-nav .nav-item:first-child').classList.add('active');
+                }
+            });
+        });
+
+        // 9. 搜索框聚焦效果
+        const searchInput = document.querySelector('.search-bar input');
+        searchInput.addEventListener('focus', () => {
+            showToast('请输入想要搜索的装扮/形象');
+        });
+    </script>
+
+    <div class="bottom-nav">
+        <a href="首页.html" class="nav-item active">
+            <div class="icon-box"></div>
+            <span>首页</span>
+        </a>
+        <a href="专项.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>专项</span>
+        </a>
+        <a href="资料库.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>资料库</span>
+        </a>
+        <a href="我的.html" class="nav-item">
+            <div class="icon-box"></div>
+            <span>我的</span>
+        </a>
+    </div>
+</body>
+</html>
